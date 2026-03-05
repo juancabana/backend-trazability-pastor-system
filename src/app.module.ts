@@ -7,6 +7,7 @@ import { AssociationModule } from './association/association.module.js';
 import { DistrictModule } from './district/district.module.js';
 import { ActivityCategoryModule } from './activity-category/activity-category.module.js';
 import { DailyReportModule } from './daily-report/daily-report.module.js';
+import { ConsolidatedModule } from './consolidated/consolidated.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -28,6 +29,7 @@ import { AppService } from './app.service.js';
     DistrictModule,
     ActivityCategoryModule,
     DailyReportModule,
+    ConsolidatedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
