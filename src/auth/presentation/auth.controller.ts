@@ -1,0 +1,102 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
+import { RolesGuard } from '../guards/roles.guard.js';
+import { Roles } from '../decorators/roles.decorator.js';
+import { UserRole } from '../../common/enums/user-role.enum.js';
+import { LoginUseCase } from '../application/use-cases/login.use-case.js';
+import { GetUsersUseCase } from '../application/use-cases/get-users.use-case.js';
+import { CreateUserUseCase } from '../application/use-cases/create-user.use-case.js';
+import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case.js';
+import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case.js';
+import { LoginDto } from '../application/dtos/login.dto.js';
+import { AuthTokenResponseDto } from '../application/dtos/auth-token.response.dto.js';
+import { CreateUserDto } from '../application/dtos/create-user.dto.js';
+import { UpdateUserDto } from '../application/dtos/update-user.dto.js';
+import { UserResponseDto } from '../application/dtos/user.response.dto.js';
+
+@ApiTags('auth')
+@Controller('auth')
+export class AuthController {
+  constructor(
+    private readonly loginUseCase: LoginUseCase,
+    private readonly getUsersUseCase: GetUsersUseCase,
+    private readonly createUserUseCase: CreateUserUseCase,
+    private readonly updateUserUseCase: UpdateUserUseCase,
+    private readonly deleteUserUseCase: DeleteUserUseCase,
+  ) {}
+
+  @Post('login')
+  @ApiOperation({ summary: 'Autenticacion de usuario' })
+  @ApiResponse({ status: 200, type: AuthTokenResponseDto })
+  @ApiResponse({ status: 401, description: 'Credenciales invalidas' })
+  login(@Body() dto: LoginDto): Promise<AuthTokenResponseDto> {
+    return this.loginUseCase.execute(dto);
+  }
+
+  @Get('users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar usuarios (filtrable por asociacion)' })
+  @ApiQuery({ name: 'associationId', required: false })
+  @ApiResponse({ status: 200, type: [UserResponseDto] })
+  getUsers(
+    @Request() req: any,
+    @Query('associationId') associationId?: string,
+  ): Promise<UserResponseDto[]> {
+    return this.getUsersUseCase.execute(
+      associationId ?? req.user.associationId,
+    );
+  }
+
+  @Post('users')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear usuario (admin)' })
+  @ApiResponse({ status: 201, type: UserResponseDto })
+  createUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
+    return this.createUserUseCase.execute(dto);
+  }
+
+  @Patch('users/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar usuario (admin)' })
+  @ApiResponse({ status: 200, type: UserResponseDto })
+  updateUser(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    return this.updateUserUseCase.execute(id, dto);
+  }
+
+  @Delete('users/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar usuario (admin)' })
+  @ApiResponse({ status: 200 })
+  deleteUser(@Param('id') id: string): Promise<void> {
+    return this.deleteUserUseCase.execute(id);
+  }
+}

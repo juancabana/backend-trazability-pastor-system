@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { databaseConfig } from './config/database.config.js';
+import { AuthModule } from './auth/auth.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -18,6 +19,7 @@ import { AppService } from './app.service.js';
       useFactory: (configService: ConfigService): TypeOrmModuleOptions =>
         configService.getOrThrow<TypeOrmModuleOptions>('database'),
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
