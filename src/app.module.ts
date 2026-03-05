@@ -5,6 +5,7 @@ import { databaseConfig } from './config/database.config.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AssociationModule } from './association/association.module.js';
 import { DistrictModule } from './district/district.module.js';
+import { ActivityCategoryModule } from './activity-category/activity-category.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -24,6 +25,7 @@ import { AppService } from './app.service.js';
     AuthModule,
     AssociationModule,
     DistrictModule,
+    ActivityCategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
