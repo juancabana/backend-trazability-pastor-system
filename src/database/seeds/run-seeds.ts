@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -7,6 +8,7 @@ import { ActivityCategoryEntity } from '../../activity-category/domain/entities/
 import { UserEntity } from '../../auth/domain/entities/user.entity.js';
 import { DailyReportEntity } from '../../daily-report/domain/entities/daily-report.entity.js';
 import { ACTIVITY_CATEGORY_SEEDS } from '../../activity-category/infrastructure/seeds/activity-category.seed.js';
+import { UserRole } from '../../common/enums/user-role.enum.js';
 
 async function runSeeds() {
   const dataSource = new DataSource({
@@ -40,9 +42,24 @@ async function runSeeds() {
     associations = existingAssoc;
   } else {
     const assocData = [
-      { name: 'Asociacion del Caribe Colombiano', union: 'Union Colombiana del Norte', country: 'Colombia', reportDeadlineDay: 19 },
-      { name: 'Asociacion del Pacifico Colombiano', union: 'Union Colombiana del Sur', country: 'Colombia', reportDeadlineDay: 19 },
-      { name: 'Asociacion Colombiana Centro Oriental', union: 'Union Colombiana del Norte', country: 'Colombia', reportDeadlineDay: 19 },
+      {
+        name: 'Asociacion del Caribe Colombiano',
+        union: 'Union Colombiana del Norte',
+        country: 'Colombia',
+        reportDeadlineDay: 19,
+      },
+      {
+        name: 'Asociacion del Pacifico Colombiano',
+        union: 'Union Colombiana del Sur',
+        country: 'Colombia',
+        reportDeadlineDay: 19,
+      },
+      {
+        name: 'Asociacion Colombiana Centro Oriental',
+        union: 'Union Colombiana del Norte',
+        country: 'Colombia',
+        reportDeadlineDay: 19,
+      },
     ];
     associations = await assocRepo.save(assocRepo.create(assocData));
     console.log(`${associations.length} asociaciones creadas.`);
@@ -56,7 +73,9 @@ async function runSeeds() {
   let districts: DistrictEntity[];
 
   if (existingDistricts.length > 0) {
-    console.log(`Ya existen ${existingDistricts.length} distritos. Saltando...`);
+    console.log(
+      `Ya existen ${existingDistricts.length} distritos. Saltando...`,
+    );
     districts = existingDistricts;
   } else {
     const districtData = [
@@ -78,7 +97,9 @@ async function runSeeds() {
     console.log(`Ya existen ${existingCats.length} categorias. Saltando...`);
   } else {
     await catRepo.save(catRepo.create(ACTIVITY_CATEGORY_SEEDS));
-    console.log(`${ACTIVITY_CATEGORY_SEEDS.length} categorias de actividad creadas.`);
+    console.log(
+      `${ACTIVITY_CATEGORY_SEEDS.length} categorias de actividad creadas.`,
+    );
   }
 
   // --- Seed Users ---
@@ -92,12 +113,54 @@ async function runSeeds() {
   } else {
     const passwordHash = await bcrypt.hash('demo1234', 12);
     const userData = [
-      { name: 'Ptr. Carlos Mendoza', email: 'pastor@demo.com', role: 'pastor' as const, passwordHash, associationId: mainAssociation.id, districtId: districts[0].id },
-      { name: 'Ptr. Maria Gonzalez', email: 'maria@demo.com', role: 'pastor' as const, passwordHash, associationId: mainAssociation.id, districtId: districts[1].id },
-      { name: 'Ptr. Juan Perez', email: 'juan@demo.com', role: 'pastor' as const, passwordHash, associationId: mainAssociation.id, districtId: districts[2].id },
-      { name: 'Ptr. Ana Rodriguez', email: 'ana@demo.com', role: 'pastor' as const, passwordHash, associationId: mainAssociation.id, districtId: districts[3].id },
-      { name: 'Ptr. Luis Herrera', email: 'luis@demo.com', role: 'pastor' as const, passwordHash, associationId: mainAssociation.id, districtId: districts[4].id },
-      { name: 'Administrador', email: 'admin@demo.com', role: 'admin' as const, passwordHash, associationId: mainAssociation.id, districtId: null },
+      {
+        name: 'Ptr. Carlos Mendoza',
+        email: 'pastor@demo.com',
+        role: UserRole.PASTOR,
+        passwordHash,
+        associationId: mainAssociation.id,
+        districtId: districts[0].id,
+      },
+      {
+        name: 'Ptr. Maria Gonzalez',
+        email: 'maria@demo.com',
+        role: UserRole.PASTOR,
+        passwordHash,
+        associationId: mainAssociation.id,
+        districtId: districts[1].id,
+      },
+      {
+        name: 'Ptr. Juan Perez',
+        email: 'juan@demo.com',
+        role: UserRole.PASTOR,
+        passwordHash,
+        associationId: mainAssociation.id,
+        districtId: districts[2].id,
+      },
+      {
+        name: 'Ptr. Ana Rodriguez',
+        email: 'ana@demo.com',
+        role: UserRole.PASTOR,
+        passwordHash,
+        associationId: mainAssociation.id,
+        districtId: districts[3].id,
+      },
+      {
+        name: 'Ptr. Luis Herrera',
+        email: 'luis@demo.com',
+        role: UserRole.PASTOR,
+        passwordHash,
+        associationId: mainAssociation.id,
+        districtId: districts[4].id,
+      },
+      {
+        name: 'Administrador',
+        email: 'admin@demo.com',
+        role: UserRole.ADMIN,
+        passwordHash,
+        associationId: mainAssociation.id,
+        districtId: undefined,
+      },
     ];
     users = await userRepo.save(userRepo.create(userData));
     console.log(`${users.length} usuarios creados.`);
@@ -123,8 +186,12 @@ async function runSeeds() {
           const usedSubcats = new Set<string>();
 
           for (let i = 0; i < numActivities; i++) {
-            const cat = categories[Math.floor(Math.random() * categories.length)];
-            const subcat = cat.subcategories[Math.floor(Math.random() * cat.subcategories.length)];
+            const cat =
+              categories[Math.floor(Math.random() * categories.length)];
+            const subcat =
+              cat.subcategories[
+                Math.floor(Math.random() * cat.subcategories.length)
+              ];
             if (usedSubcats.has(subcat.id)) continue;
             usedSubcats.add(subcat.id);
 
@@ -134,8 +201,12 @@ async function runSeeds() {
               categoryId: cat.id,
               description: '',
               quantity: Math.floor(Math.random() * 5) + 1,
-              hours: subcat.hasHours ? Math.round((Math.random() * 4 + 0.5) * 10) / 10 : undefined,
-              amount: isTransport ? Math.round((Math.random() * 80000 + 5000) / 100) * 100 : undefined,
+              hours: subcat.hasHours
+                ? Math.round((Math.random() * 4 + 0.5) * 10) / 10
+                : undefined,
+              amount: isTransport
+                ? Math.round((Math.random() * 80000 + 5000) / 100) * 100
+                : undefined,
             });
           }
 
@@ -144,7 +215,10 @@ async function runSeeds() {
               pastorId: pastor.id,
               date: dateStr,
               activities,
-              observations: Math.random() > 0.7 ? 'Preparar materiales para la proxima sesion.' : '',
+              observations:
+                Math.random() > 0.7
+                  ? 'Preparar materiales para la proxima sesion.'
+                  : '',
             });
           }
         }
