@@ -18,7 +18,7 @@ export class GetUsersUseCase {
     page?: number,
     limit?: number,
   ): Promise<UserResponseDto[] | PaginatedUsers> {
-    const mapUser = (u: { id: string; name: string; email: string; role: string; associationId: string | null; districtId: string | null; unionId: string | null; createdAt: Date }): UserResponseDto => ({
+    const mapUser = (u: { id: string; name: string; email: string; role: string; associationId: string | null; districtId: string | null; unionId: string | null; position: string | null; phone: string | null; createdAt: Date }): UserResponseDto => ({
       id: u.id,
       name: u.name,
       email: u.email,
@@ -26,6 +26,8 @@ export class GetUsersUseCase {
       associationId: u.associationId,
       districtId: u.districtId,
       unionId: u.unionId,
+      position: u.position,
+      phone: u.phone,
       createdAt: u.createdAt,
     });
 

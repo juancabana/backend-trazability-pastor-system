@@ -25,6 +25,8 @@ export class CreateUserUseCase {
       associationId: dto.associationId ?? null,
       districtId: dto.districtId ?? null,
       unionId: dto.unionId ?? null,
+      position: dto.position ?? null,
+      phone: dto.phone ?? null,
     });
 
     return {
@@ -35,6 +37,8 @@ export class CreateUserUseCase {
       associationId: user.associationId,
       districtId: user.districtId,
       unionId: user.unionId,
+      position: user.position,
+      phone: user.phone,
       createdAt: user.createdAt,
     };
   }

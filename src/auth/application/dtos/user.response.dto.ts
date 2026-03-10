@@ -30,6 +30,14 @@ export class UserResponseDto {
   @Expose()
   unionId: string | null;
 
+  @ApiPropertyOptional()
+  @Expose()
+  position: string | null;
+
+  @ApiPropertyOptional()
+  @Expose()
+  phone: string | null;
+
   @ApiProperty()
   @Expose()
   createdAt: Date;

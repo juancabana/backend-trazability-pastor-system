@@ -73,7 +73,7 @@ export class AuthController {
     const p = page ? parseInt(page) : undefined;
     const l = limit ? parseInt(limit) : undefined;
     return this.getUsersUseCase.execute(
-      associationId ?? req.user.associationId,
+      associationId ?? req.user.associationId ?? undefined,
       p && p > 0 ? p : undefined,
       l && l > 0 ? l : undefined,
     );

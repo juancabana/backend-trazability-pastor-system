@@ -51,7 +51,7 @@ export class DailyReportController {
   ): Promise<DailyReportResponseDto> {
     return this.createOrUpdateReportUseCase.execute(
       req.user.sub,
-      req.user.associationId,
+      req.user.associationId!,
       dto,
     );
   }
@@ -109,7 +109,7 @@ export class DailyReportController {
     return this.deleteReportUseCase.execute(
       id,
       req.user.sub,
-      req.user.associationId,
+      req.user.associationId!,
     );
   }
 }
