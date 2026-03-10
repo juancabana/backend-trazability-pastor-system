@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export interface SubCategoryConsolidated {
   subcategoryId: string;
@@ -52,8 +52,8 @@ export class PastorSummaryDto {
   @ApiProperty()
   pastorName: string;
 
-  @ApiProperty()
-  districtName: string;
+  @ApiPropertyOptional()
+  districtName: string | null;
 
   @ApiProperty()
   totalReports: number;
