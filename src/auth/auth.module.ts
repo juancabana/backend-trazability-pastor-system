@@ -3,7 +3,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './domain/entities/user.entity.js';
+import { AssociationEntity } from '../association/domain/entities/association.entity.js';
+import { UnionEntity } from '../union/domain/entities/union.entity.js';
 import { UserRepository } from './infrastructure/repositories/user.repository.js';
+import { AssociationRepository } from '../association/infrastructure/repositories/association.repository.js';
+import { UnionRepository } from '../union/infrastructure/repositories/union.repository.js';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy.js';
 import { LoginUseCase } from './application/use-cases/login.use-case.js';
 import { GetUsersUseCase } from './application/use-cases/get-users.use-case.js';
@@ -15,7 +19,7 @@ import { AuthController } from './presentation/auth.controller.js';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, AssociationEntity, UnionEntity]),
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'pastor_jwt_secret_2026',
@@ -25,6 +29,8 @@ import { AuthController } from './presentation/auth.controller.js';
   controllers: [AuthController],
   providers: [
     UserRepository,
+    AssociationRepository,
+    UnionRepository,
     JwtStrategy,
     LoginUseCase,
     GetUsersUseCase,

@@ -18,13 +18,17 @@ export class UserResponseDto {
   @Expose()
   role: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @Expose()
-  associationId: string;
+  associationId: string | null;
 
   @ApiPropertyOptional()
   @Expose()
   districtId: string | null;
+
+  @ApiPropertyOptional()
+  @Expose()
+  unionId: string | null;
 
   @ApiProperty()
   @Expose()

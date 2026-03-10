@@ -1,20 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export interface SubCategoryTotal {
-  registros: number;
-  cantidad: number;
-  horas: number;
-  monto: number;
+export interface SubCategoryConsolidated {
+  subcategoryId: string;
+  subcategoryName: string;
+  unit: string;
+  totalQuantity: number;
+  totalHours: number;
+  totalAmount: number;
 }
 
 export interface CategoryConsolidated {
   categoryId: string;
   categoryName: string;
-  subcategories: Record<string, SubCategoryTotal & { name: string }>;
-  totalRegistros: number;
-  totalCantidad: number;
-  totalHoras: number;
-  totalMonto: number;
+  color: string;
+  bgColor: string;
+  subcategories: SubCategoryConsolidated[];
+}
+
+export interface ConsolidatedTotals {
+  totalActivities: number;
+  totalHours: number;
 }
 
 export class ConsolidatedResponseDto {
@@ -22,16 +27,13 @@ export class ConsolidatedResponseDto {
   categories: CategoryConsolidated[];
 
   @ApiProperty()
+  totals: ConsolidatedTotals;
+
+  @ApiProperty({ description: 'Compliance as decimal 0-1' })
+  compliance: number;
+
+  @ApiProperty()
   totalReports: number;
-
-  @ApiProperty()
-  totalActivities: number;
-
-  @ApiProperty()
-  totalHours: number;
-
-  @ApiProperty()
-  totalTransportAmount: number;
 
   @ApiProperty()
   daysInPeriod: number;
@@ -40,7 +42,7 @@ export class ConsolidatedResponseDto {
   daysWithReports: number;
 
   @ApiProperty()
-  compliancePercentage: number;
+  totalTransportAmount: number;
 }
 
 export class PastorSummaryDto {
@@ -65,8 +67,8 @@ export class PastorSummaryDto {
   @ApiProperty()
   totalTransportAmount: number;
 
-  @ApiProperty()
-  compliancePercentage: number;
+  @ApiProperty({ description: 'Compliance as decimal 0-1' })
+  compliance: number;
 }
 
 export class AssociationConsolidatedResponseDto {
@@ -77,13 +79,7 @@ export class AssociationConsolidatedResponseDto {
   pastorSummaries: PastorSummaryDto[];
 
   @ApiProperty()
-  totalReports: number;
-
-  @ApiProperty()
-  totalActivities: number;
-
-  @ApiProperty()
-  totalHours: number;
+  totals: ConsolidatedTotals;
 
   @ApiProperty()
   totalTransportAmount: number;

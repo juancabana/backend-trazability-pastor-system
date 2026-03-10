@@ -4,7 +4,6 @@ import {
   MinLength,
   MaxLength,
   IsEmail,
-  IsUUID,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -20,9 +19,4 @@ export class LoginDto {
   @MinLength(6)
   @MaxLength(128)
   password: string;
-
-  @ApiProperty({ example: 'uuid-de-asociacion' })
-  @IsUUID()
-  @IsNotEmpty()
-  associationId: string;
 }

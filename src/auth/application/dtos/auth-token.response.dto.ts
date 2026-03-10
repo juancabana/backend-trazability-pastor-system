@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 export class AuthTokenResponseDto {
@@ -22,7 +22,19 @@ export class AuthTokenResponseDto {
   @Expose()
   userId: string;
 
-  @ApiProperty({ example: 'uuid-de-asociacion' })
+  @ApiPropertyOptional({ example: 'uuid-de-asociacion' })
   @Expose()
-  associationId: string;
+  associationId: string | null;
+
+  @ApiPropertyOptional({ example: 'Asociacion del Caribe Colombiano' })
+  @Expose()
+  associationName?: string;
+
+  @ApiPropertyOptional({ example: 'uuid-de-union' })
+  @Expose()
+  unionId: string | null;
+
+  @ApiPropertyOptional({ example: 'Union Colombiana del Norte' })
+  @Expose()
+  unionName?: string;
 }

@@ -18,7 +18,7 @@ export class UpdateAssociationUseCase {
 
     const updates: Record<string, unknown> = {};
     if (dto.name) updates.name = dto.name.trim();
-    if (dto.union) updates.union = dto.union.trim();
+    if (dto.unionId) updates.unionId = dto.unionId;
     if (dto.country) updates.country = dto.country.trim();
     if (dto.reportDeadlineDay !== undefined)
       updates.reportDeadlineDay = dto.reportDeadlineDay;
@@ -31,7 +31,7 @@ export class UpdateAssociationUseCase {
     return {
       id: updated.id,
       name: updated.name,
-      union: updated.union,
+      unionId: updated.unionId,
       country: updated.country,
       reportDeadlineDay: updated.reportDeadlineDay,
     };

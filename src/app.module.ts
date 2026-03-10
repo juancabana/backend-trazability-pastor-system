@@ -8,6 +8,8 @@ import { DistrictModule } from './district/district.module.js';
 import { ActivityCategoryModule } from './activity-category/activity-category.module.js';
 import { DailyReportModule } from './daily-report/daily-report.module.js';
 import { ConsolidatedModule } from './consolidated/consolidated.module.js';
+import { UnionModule } from './union/union.module.js';
+import { ChurchModule } from './church/church.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -30,6 +32,8 @@ import { AppService } from './app.service.js';
     ActivityCategoryModule,
     DailyReportModule,
     ConsolidatedModule,
+    UnionModule,
+    ChurchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

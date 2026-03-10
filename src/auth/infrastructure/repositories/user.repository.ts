@@ -29,6 +29,13 @@ export class UserRepository {
     return this.repo.findOne({ where: { id } });
   }
 
+  async findByDistrict(districtId: string): Promise<UserEntity[]> {
+    return this.repo.find({
+      where: { districtId },
+      order: { createdAt: 'ASC' },
+    });
+  }
+
   async create(data: Partial<UserEntity>): Promise<UserEntity> {
     const entity = this.repo.create(data);
     return this.repo.save(entity);

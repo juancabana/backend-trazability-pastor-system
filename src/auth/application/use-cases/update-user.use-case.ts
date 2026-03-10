@@ -33,6 +33,7 @@ export class UpdateUserUseCase {
       role: updated.role,
       associationId: updated.associationId,
       districtId: updated.districtId,
+      unionId: updated.unionId,
       createdAt: updated.createdAt,
     };
   }

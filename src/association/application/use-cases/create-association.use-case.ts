@@ -10,7 +10,7 @@ export class CreateAssociationUseCase {
   async execute(dto: CreateAssociationDto): Promise<AssociationResponseDto> {
     const association = await this.repo.create({
       name: dto.name.trim(),
-      union: dto.union.trim(),
+      unionId: dto.unionId,
       country: dto.country.trim(),
       reportDeadlineDay: dto.reportDeadlineDay,
     });
@@ -18,7 +18,7 @@ export class CreateAssociationUseCase {
     return {
       id: association.id,
       name: association.name,
-      union: association.union,
+      unionId: association.unionId,
       country: association.country,
       reportDeadlineDay: association.reportDeadlineDay,
     };

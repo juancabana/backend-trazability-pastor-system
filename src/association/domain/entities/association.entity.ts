@@ -14,8 +14,8 @@ export class AssociationEntity {
   @Column({ type: 'varchar', length: 200 })
   name: string;
 
-  @Column({ type: 'varchar', length: 200 })
-  union: string;
+  @Column({ type: 'uuid' })
+  unionId: string;
 
   @Column({ type: 'varchar', length: 100 })
   country: string;

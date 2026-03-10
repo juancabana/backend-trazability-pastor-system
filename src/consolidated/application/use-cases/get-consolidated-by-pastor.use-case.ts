@@ -4,6 +4,7 @@ import { ActivityCategoryRepository } from '../../../activity-category/infrastru
 import {
   ConsolidatedResponseDto,
   CategoryConsolidated,
+  SubCategoryConsolidated,
 } from '../dtos/consolidated.response.dto.js';
 
 @Injectable()
@@ -25,24 +26,21 @@ export class GetConsolidatedByPastorUseCase {
     );
     const categories = await this.categoryRepo.findAll();
 
-    const categoryMap: Record<string, CategoryConsolidated> = {};
+    // Build subcategory accumulators keyed by categoryId -> subcategoryId
+    const subAccum: Record<
+      string,
+      Record<string, { name: string; unit: string; qty: number; hrs: number; amt: number }>
+    > = {};
+
     for (const cat of categories) {
-      categoryMap[cat.id] = {
-        categoryId: cat.id,
-        categoryName: cat.name,
-        subcategories: {},
-        totalRegistros: 0,
-        totalCantidad: 0,
-        totalHoras: 0,
-        totalMonto: 0,
-      };
+      subAccum[cat.id] = {};
       for (const sub of cat.subcategories) {
-        categoryMap[cat.id].subcategories[sub.id] = {
+        subAccum[cat.id][sub.id] = {
           name: sub.name,
-          registros: 0,
-          cantidad: 0,
-          horas: 0,
-          monto: 0,
+          unit: sub.unit,
+          qty: 0,
+          hrs: 0,
+          amt: 0,
         };
       }
     }
@@ -55,20 +53,14 @@ export class GetConsolidatedByPastorUseCase {
     for (const report of reports) {
       daysWithReports.add(report.date);
       for (const activity of report.activities) {
-        const cat = categoryMap[activity.categoryId];
-        if (!cat) continue;
-        const sub = cat.subcategories[activity.subcategoryId];
+        const catSubs = subAccum[activity.categoryId];
+        if (!catSubs) continue;
+        const sub = catSubs[activity.subcategoryId];
         if (!sub) continue;
 
-        sub.registros += 1;
-        sub.cantidad += activity.quantity || 0;
-        sub.horas += activity.hours || 0;
-        sub.monto += activity.amount || 0;
-
-        cat.totalRegistros += 1;
-        cat.totalCantidad += activity.quantity || 0;
-        cat.totalHoras += activity.hours || 0;
-        cat.totalMonto += activity.amount || 0;
+        sub.qty += activity.quantity || 0;
+        sub.hrs += activity.hours || 0;
+        sub.amt += activity.amount || 0;
 
         totalActivities += 1;
         totalHours += activity.hours || 0;
@@ -78,18 +70,44 @@ export class GetConsolidatedByPastorUseCase {
 
     const daysInMonth = new Date(year, month, 0).getDate();
 
+    // Build categories array with subcategories as arrays
+    const consolidatedCategories: CategoryConsolidated[] = categories.map((cat) => {
+      const subs = subAccum[cat.id];
+      const subcategories: SubCategoryConsolidated[] = cat.subcategories.map((sub) => {
+        const acc = subs[sub.id];
+        return {
+          subcategoryId: sub.id,
+          subcategoryName: acc.name,
+          unit: acc.unit,
+          totalQuantity: acc.qty,
+          totalHours: Math.round(acc.hrs * 10) / 10,
+          totalAmount: acc.amt,
+        };
+      });
+
+      return {
+        categoryId: cat.id,
+        categoryName: cat.name,
+        color: cat.color,
+        bgColor: cat.bgColor,
+        subcategories,
+      };
+    });
+
     return {
-      categories: Object.values(categoryMap),
+      categories: consolidatedCategories,
+      totals: {
+        totalActivities,
+        totalHours: Math.round(totalHours * 10) / 10,
+      },
+      compliance:
+        daysInMonth > 0
+          ? Math.round((daysWithReports.size / daysInMonth) * 100) / 100
+          : 0,
       totalReports: reports.length,
-      totalActivities,
-      totalHours: Math.round(totalHours * 10) / 10,
-      totalTransportAmount,
       daysInPeriod: daysInMonth,
       daysWithReports: daysWithReports.size,
-      compliancePercentage:
-        daysInMonth > 0
-          ? Math.round((daysWithReports.size / daysInMonth) * 100)
-          : 0,
+      totalTransportAmount,
     };
   }
 }

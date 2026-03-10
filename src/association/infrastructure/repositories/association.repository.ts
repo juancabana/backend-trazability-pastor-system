@@ -18,6 +18,10 @@ export class AssociationRepository {
     return this.repo.findOne({ where: { id } });
   }
 
+  async findByUnion(unionId: string): Promise<AssociationEntity[]> {
+    return this.repo.find({ where: { unionId }, order: { name: 'ASC' } });
+  }
+
   async create(
     data: Partial<AssociationEntity>,
   ): Promise<AssociationEntity> {

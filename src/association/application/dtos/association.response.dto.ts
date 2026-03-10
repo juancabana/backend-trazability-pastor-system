@@ -12,7 +12,7 @@ export class AssociationResponseDto {
 
   @ApiProperty()
   @Expose()
-  union: string;
+  unionId: string;
 
   @ApiProperty()
   @Expose()

@@ -34,13 +34,18 @@ export class CreateUserDto {
   @IsEnum(UserRole)
   role: UserRole;
 
-  @ApiProperty({ example: 'uuid-de-asociacion' })
+  @ApiPropertyOptional({ example: 'uuid-de-asociacion' })
+  @IsOptional()
   @IsUUID()
-  @IsNotEmpty()
-  associationId: string;
+  associationId?: string;
 
   @ApiPropertyOptional({ example: 'uuid-de-distrito' })
   @IsOptional()
   @IsUUID()
   districtId?: string;
+
+  @ApiPropertyOptional({ example: 'uuid-de-union' })
+  @IsOptional()
+  @IsUUID()
+  unionId?: string;
 }

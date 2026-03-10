@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -28,8 +28,8 @@ export class AssociationController {
   @Get()
   @ApiOperation({ summary: 'Listar todas las asociaciones' })
   @ApiResponse({ status: 200, type: [AssociationResponseDto] })
-  getAll(): Promise<AssociationResponseDto[]> {
-    return this.getAssociationsUseCase.execute();
+  getAll(@Query('unionId') unionId?: string): Promise<AssociationResponseDto[]> {
+    return this.getAssociationsUseCase.execute(unionId);
   }
 
   @Post()

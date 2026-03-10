@@ -18,6 +18,7 @@ export class GetUsersUseCase {
       role: u.role,
       associationId: u.associationId,
       districtId: u.districtId,
+      unionId: u.unionId,
       createdAt: u.createdAt,
     }));
   }

@@ -23,11 +23,14 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 255 })
   passwordHash: string;
 
-  @Column({ type: 'uuid' })
-  associationId: string;
+  @Column({ type: 'uuid', nullable: true })
+  associationId: string | null;
 
   @Column({ type: 'uuid', nullable: true })
   districtId: string | null;
+
+  @Column({ type: 'uuid', nullable: true })
+  unionId: string | null;
 
   @CreateDateColumn()
   createdAt: Date;

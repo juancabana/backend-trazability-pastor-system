@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from '../../infrastructure/repositories/user.repository.js';
+import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
+import { UnionRepository } from '../../../union/infrastructure/repositories/union.repository.js';
 import { LoginDto } from '../dtos/login.dto.js';
 import { AuthTokenResponseDto } from '../dtos/auth-token.response.dto.js';
 
@@ -10,6 +12,8 @@ export class LoginUseCase {
   constructor(
     private readonly userRepo: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly associationRepo: AssociationRepository,
+    private readonly unionRepo: UnionRepository,
   ) {}
 
   async execute(dto: LoginDto): Promise<AuthTokenResponseDto> {
@@ -18,15 +22,23 @@ export class LoginUseCase {
       throw new UnauthorizedException('Credenciales invalidas');
     }
 
-    if (user.associationId !== dto.associationId) {
-      throw new UnauthorizedException(
-        'El usuario no pertenece a esta asociacion',
-      );
-    }
-
     const isValid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!isValid) {
       throw new UnauthorizedException('Credenciales invalidas');
+    }
+
+    // Resolve association and union names
+    let associationName: string | undefined;
+    let unionName: string | undefined;
+
+    if (user.associationId) {
+      const association = await this.associationRepo.findById(user.associationId);
+      associationName = association?.name;
+    }
+
+    if (user.unionId) {
+      const union = await this.unionRepo.findById(user.unionId);
+      unionName = union?.name;
     }
 
     const payload = {
@@ -35,6 +47,9 @@ export class LoginUseCase {
       role: user.role,
       displayName: user.name,
       associationId: user.associationId,
+      associationName,
+      unionId: user.unionId,
+      unionName,
     };
     const token = this.jwtService.sign(payload);
 
@@ -45,6 +60,9 @@ export class LoginUseCase {
       email: user.email,
       userId: user.id,
       associationId: user.associationId,
+      associationName,
+      unionId: user.unionId,
+      unionName,
     };
   }
 }

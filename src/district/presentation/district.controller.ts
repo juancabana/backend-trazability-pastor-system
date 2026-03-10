@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -22,6 +23,7 @@ import { UserRole } from '../../common/enums/user-role.enum.js';
 import { GetDistrictsUseCase } from '../application/use-cases/get-districts.use-case.js';
 import { CreateDistrictUseCase } from '../application/use-cases/create-district.use-case.js';
 import { UpdateDistrictUseCase } from '../application/use-cases/update-district.use-case.js';
+import { DeleteDistrictUseCase } from '../application/use-cases/delete-district.use-case.js';
 import { CreateDistrictDto } from '../application/dtos/create-district.dto.js';
 import { UpdateDistrictDto } from '../application/dtos/update-district.dto.js';
 import { DistrictResponseDto } from '../application/dtos/district.response.dto.js';
@@ -33,6 +35,7 @@ export class DistrictController {
     private readonly getDistrictsUseCase: GetDistrictsUseCase,
     private readonly createDistrictUseCase: CreateDistrictUseCase,
     private readonly updateDistrictUseCase: UpdateDistrictUseCase,
+    private readonly deleteDistrictUseCase: DeleteDistrictUseCase,
   ) {}
 
   @Get()
@@ -66,5 +69,14 @@ export class DistrictController {
     @Body() dto: UpdateDistrictDto,
   ): Promise<DistrictResponseDto> {
     return this.updateDistrictUseCase.execute(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar distrito (admin, sin iglesias/pastores)' })
+  delete(@Param('id') id: string): Promise<void> {
+    return this.deleteDistrictUseCase.execute(id);
   }
 }

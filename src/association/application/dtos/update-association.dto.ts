@@ -5,6 +5,7 @@ import {
   IsInt,
   Min,
   Max,
+  IsUUID,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -15,11 +16,10 @@ export class UpdateAssociationDto {
   @MaxLength(200)
   name?: string;
 
-  @ApiPropertyOptional({ example: 'Union Colombiana del Norte' })
+  @ApiPropertyOptional({ example: 'uuid-de-union' })
   @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  union?: string;
+  @IsUUID()
+  unionId?: string;
 
   @ApiPropertyOptional({ example: 'Colombia' })
   @IsOptional()

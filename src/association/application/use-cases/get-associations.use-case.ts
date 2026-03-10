@@ -6,12 +6,14 @@ import { AssociationResponseDto } from '../dtos/association.response.dto.js';
 export class GetAssociationsUseCase {
   constructor(private readonly repo: AssociationRepository) {}
 
-  async execute(): Promise<AssociationResponseDto[]> {
-    const associations = await this.repo.findAll();
+  async execute(unionId?: string): Promise<AssociationResponseDto[]> {
+    const associations = unionId
+      ? await this.repo.findByUnion(unionId)
+      : await this.repo.findAll();
     return associations.map((a) => ({
       id: a.id,
       name: a.name,
-      union: a.union,
+      unionId: a.unionId,
       country: a.country,
       reportDeadlineDay: a.reportDeadlineDay,
     }));

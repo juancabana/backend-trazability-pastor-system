@@ -22,8 +22,9 @@ export class CreateUserUseCase {
       email: dto.email.toLowerCase().trim(),
       role: dto.role,
       passwordHash,
-      associationId: dto.associationId,
+      associationId: dto.associationId ?? null,
       districtId: dto.districtId ?? null,
+      unionId: dto.unionId ?? null,
     });
 
     return {
@@ -33,6 +34,7 @@ export class CreateUserUseCase {
       role: user.role,
       associationId: user.associationId,
       districtId: user.districtId,
+      unionId: user.unionId,
       createdAt: user.createdAt,
     };
   }

@@ -13,6 +13,10 @@ import { UserRole } from '../../common/enums/user-role.enum.js';
 import { GetConsolidatedByPastorUseCase } from '../application/use-cases/get-consolidated-by-pastor.use-case.js';
 import { GetConsolidatedByAssociationUseCase } from '../application/use-cases/get-consolidated-by-association.use-case.js';
 import {
+  GetConsolidatedByUnionUseCase,
+  UnionConsolidatedResponseDto,
+} from '../application/use-cases/get-consolidated-by-union.use-case.js';
+import {
   ConsolidatedResponseDto,
   AssociationConsolidatedResponseDto,
 } from '../application/dtos/consolidated.response.dto.js';
@@ -23,6 +27,7 @@ export class ConsolidatedController {
   constructor(
     private readonly getByPastorUseCase: GetConsolidatedByPastorUseCase,
     private readonly getByAssociationUseCase: GetConsolidatedByAssociationUseCase,
+    private readonly getByUnionUseCase: GetConsolidatedByUnionUseCase,
   ) {}
 
   @Get('pastor/:pastorId')
@@ -59,6 +64,25 @@ export class ConsolidatedController {
   ): Promise<AssociationConsolidatedResponseDto> {
     return this.getByAssociationUseCase.execute(
       associationId,
+      parseInt(month),
+      parseInt(year),
+    );
+  }
+
+  @Get('union/:unionId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Consolidado por union (super_admin, mes/ano)' })
+  @ApiQuery({ name: 'month', required: true, type: Number })
+  @ApiQuery({ name: 'year', required: true, type: Number })
+  getByUnion(
+    @Param('unionId') unionId: string,
+    @Query('month') month: string,
+    @Query('year') year: string,
+  ): Promise<UnionConsolidatedResponseDto> {
+    return this.getByUnionUseCase.execute(
+      unionId,
       parseInt(month),
       parseInt(year),
     );

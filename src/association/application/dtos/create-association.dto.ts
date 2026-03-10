@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, MaxLength, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  MaxLength,
+  IsInt,
+  Min,
+  Max,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAssociationDto {
@@ -8,11 +16,10 @@ export class CreateAssociationDto {
   @MaxLength(200)
   name: string;
 
-  @ApiProperty({ example: 'Union Colombiana del Norte' })
-  @IsString()
+  @ApiProperty({ example: 'uuid-de-union' })
+  @IsUUID()
   @IsNotEmpty()
-  @MaxLength(200)
-  union: string;
+  unionId: string;
 
   @ApiProperty({ example: 'Colombia' })
   @IsString()
