@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -24,6 +24,18 @@ import {
 @ApiTags('consolidated')
 @Controller('consolidated')
 export class ConsolidatedController {
+  private validateMonthYear(month: string, year: string): { m: number; y: number } {
+    const m = parseInt(month);
+    const y = parseInt(year);
+    if (isNaN(m) || m < 1 || m > 12) {
+      throw new BadRequestException('month debe ser un numero entre 1 y 12');
+    }
+    if (isNaN(y) || y < 2000 || y > 2100) {
+      throw new BadRequestException('year debe ser un numero valido');
+    }
+    return { m, y };
+  }
+
   constructor(
     private readonly getByPastorUseCase: GetConsolidatedByPastorUseCase,
     private readonly getByAssociationUseCase: GetConsolidatedByAssociationUseCase,
@@ -42,11 +54,8 @@ export class ConsolidatedController {
     @Query('month') month: string,
     @Query('year') year: string,
   ): Promise<ConsolidatedResponseDto> {
-    return this.getByPastorUseCase.execute(
-      pastorId,
-      parseInt(month),
-      parseInt(year),
-    );
+    const { m, y } = this.validateMonthYear(month, year);
+    return this.getByPastorUseCase.execute(pastorId, m, y);
   }
 
   @Get('association/:associationId')
@@ -62,11 +71,8 @@ export class ConsolidatedController {
     @Query('month') month: string,
     @Query('year') year: string,
   ): Promise<AssociationConsolidatedResponseDto> {
-    return this.getByAssociationUseCase.execute(
-      associationId,
-      parseInt(month),
-      parseInt(year),
-    );
+    const { m, y } = this.validateMonthYear(month, year);
+    return this.getByAssociationUseCase.execute(associationId, m, y);
   }
 
   @Get('union/:unionId')
@@ -81,10 +87,7 @@ export class ConsolidatedController {
     @Query('month') month: string,
     @Query('year') year: string,
   ): Promise<UnionConsolidatedResponseDto> {
-    return this.getByUnionUseCase.execute(
-      unionId,
-      parseInt(month),
-      parseInt(year),
-    );
+    const { m, y } = this.validateMonthYear(month, year);
+    return this.getByUnionUseCase.execute(unionId, m, y);
   }
 }

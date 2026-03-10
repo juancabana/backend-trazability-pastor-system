@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -20,6 +21,7 @@ import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../auth/guards/roles.guard.js';
 import { Roles } from '../../auth/decorators/roles.decorator.js';
 import { UserRole } from '../../common/enums/user-role.enum.js';
+import type { JwtPayload } from '../../auth/infrastructure/strategies/jwt.strategy.js';
 import { CreateOrUpdateReportUseCase } from '../application/use-cases/create-or-update-report.use-case.js';
 import { GetReportsByPastorUseCase } from '../application/use-cases/get-reports-by-pastor.use-case.js';
 import { GetReportByPastorAndDateUseCase } from '../application/use-cases/get-report-by-pastor-and-date.use-case.js';
@@ -44,7 +46,7 @@ export class DailyReportController {
   @ApiOperation({ summary: 'Crear o actualizar reporte diario (pastor)' })
   @ApiResponse({ status: 201, type: DailyReportResponseDto })
   createOrUpdate(
-    @Request() req: any,
+    @Request() req: { user: JwtPayload },
     @Body() dto: CreateDailyReportDto,
   ): Promise<DailyReportResponseDto> {
     return this.createOrUpdateReportUseCase.execute(
@@ -66,6 +68,18 @@ export class DailyReportController {
     @Query('month') month?: string,
     @Query('year') year?: string,
   ): Promise<DailyReportResponseDto[]> {
+    if (month) {
+      const m = parseInt(month);
+      if (isNaN(m) || m < 1 || m > 12) {
+        throw new BadRequestException('month debe ser un numero entre 1 y 12');
+      }
+    }
+    if (year) {
+      const y = parseInt(year);
+      if (isNaN(y) || y < 2000 || y > 2100) {
+        throw new BadRequestException('year debe ser un numero valido');
+      }
+    }
     return this.getReportsByPastorUseCase.execute(
       pastorId,
       month ? parseInt(month) : undefined,
@@ -91,7 +105,7 @@ export class DailyReportController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar reporte diario (pastor, periodo actual)' })
   @ApiResponse({ status: 200 })
-  delete(@Param('id') id: string, @Request() req: any): Promise<void> {
+  delete(@Param('id') id: string, @Request() req: { user: JwtPayload }): Promise<void> {
     return this.deleteReportUseCase.execute(
       id,
       req.user.sub,

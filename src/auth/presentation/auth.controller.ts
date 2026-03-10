@@ -21,6 +21,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import { RolesGuard } from '../guards/roles.guard.js';
 import { Roles } from '../decorators/roles.decorator.js';
 import { UserRole } from '../../common/enums/user-role.enum.js';
+import type { JwtPayload } from '../infrastructure/strategies/jwt.strategy.js';
 import { LoginUseCase } from '../application/use-cases/login.use-case.js';
 import { GetUsersUseCase } from '../application/use-cases/get-users.use-case.js';
 import { CreateUserUseCase } from '../application/use-cases/create-user.use-case.js';
@@ -59,7 +60,7 @@ export class AuthController {
   @ApiQuery({ name: 'associationId', required: false })
   @ApiResponse({ status: 200, type: [UserResponseDto] })
   getUsers(
-    @Request() req: any,
+    @Request() req: { user: JwtPayload },
     @Query('associationId') associationId?: string,
   ): Promise<UserResponseDto[]> {
     return this.getUsersUseCase.execute(
