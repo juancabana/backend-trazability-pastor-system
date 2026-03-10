@@ -25,6 +25,30 @@ export class UserRepository {
     });
   }
 
+  async findByAssociationPaginated(
+    associationId: string,
+    page: number,
+    limit: number,
+  ): Promise<[UserEntity[], number]> {
+    return this.repo.findAndCount({
+      where: { associationId },
+      order: { createdAt: 'ASC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
+
+  async findAllPaginated(
+    page: number,
+    limit: number,
+  ): Promise<[UserEntity[], number]> {
+    return this.repo.findAndCount({
+      order: { createdAt: 'ASC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+  }
+
   async findById(id: string): Promise<UserEntity | null> {
     return this.repo.findOne({ where: { id } });
   }

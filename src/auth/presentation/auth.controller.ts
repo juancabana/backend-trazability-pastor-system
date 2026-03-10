@@ -59,15 +59,23 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Listar usuarios (filtrable por asociacion)' })
+  @ApiOperation({ summary: 'Listar usuarios (filtrable por asociacion, paginable)' })
   @ApiQuery({ name: 'associationId', required: false })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Pagina (desde 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Registros por pagina' })
   @ApiResponse({ status: 200, type: [UserResponseDto] })
   getUsers(
     @Request() req: { user: JwtPayload },
     @Query('associationId') associationId?: string,
-  ): Promise<UserResponseDto[]> {
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = page ? parseInt(page) : undefined;
+    const l = limit ? parseInt(limit) : undefined;
     return this.getUsersUseCase.execute(
       associationId ?? req.user.associationId,
+      p && p > 0 ? p : undefined,
+      l && l > 0 ? l : undefined,
     );
   }
 
