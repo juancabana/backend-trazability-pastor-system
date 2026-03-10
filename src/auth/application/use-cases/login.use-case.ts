@@ -27,19 +27,13 @@ export class LoginUseCase {
       throw new UnauthorizedException('Credenciales invalidas');
     }
 
-    // Resolve association and union names
-    let associationName: string | undefined;
-    let unionName: string | undefined;
-
-    if (user.associationId) {
-      const association = await this.associationRepo.findById(user.associationId);
-      associationName = association?.name;
-    }
-
-    if (user.unionId) {
-      const union = await this.unionRepo.findById(user.unionId);
-      unionName = union?.name;
-    }
+    // Resolve association and union names in parallel
+    const [association, union] = await Promise.all([
+      user.associationId ? this.associationRepo.findById(user.associationId) : null,
+      user.unionId ? this.unionRepo.findById(user.unionId) : null,
+    ]);
+    const associationName = association?.name;
+    const unionName = union?.name;
 
     const payload = {
       sub: user.id,
