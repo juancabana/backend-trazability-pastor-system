@@ -37,4 +37,8 @@ export class AuthTokenResponseDto {
   @ApiPropertyOptional({ example: 'Union Colombiana del Norte' })
   @Expose()
   unionName?: string;
+
+  @ApiPropertyOptional({ example: 19, description: 'Dia limite de reporte de la asociacion' })
+  @Expose()
+  reportDeadlineDay?: number;
 }

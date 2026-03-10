@@ -34,6 +34,7 @@ export class LoginUseCase {
     ]);
     const associationName = association?.name;
     const unionName = union?.name;
+    const reportDeadlineDay = association?.reportDeadlineDay;
 
     const payload = {
       sub: user.id,
@@ -57,6 +58,7 @@ export class LoginUseCase {
       associationName,
       unionId: user.unionId,
       unionName,
+      reportDeadlineDay,
     };
   }
 }
