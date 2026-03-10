@@ -59,6 +59,7 @@ export class LoginUseCase {
       unionId: user.unionId,
       unionName,
       reportDeadlineDay,
+      position: user.position ?? undefined,
     };
   }
 }

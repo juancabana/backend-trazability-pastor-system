@@ -135,8 +135,54 @@ async function runSeeds() {
   const associations = await assocRepo.save(assocRepo.create(assocData));
   console.log(`${associations.length} asociaciones creadas.`);
 
-  // --- Seed Districts (2 per association) ---
-  const districtNames = [
+  // --- Seed Districts for Asociacion del Caribe Colombiano (real data) ---
+  const caribbeAssoc = associations.find(
+    (a) => a.name === 'Asociacion del Caribe Colombiano',
+  )!;
+
+  const realDistrictNames = [
+    'Achi Bolivar',
+    'Bajo Sinu',
+    'C/gena Bosque',
+    'C/gena Central',
+    'C/gena Emaus',
+    'C/gena Oriental',
+    'Carmen de Bolivar',
+    'C/gena Norte',
+    'Chinu',
+    'Ebenezer',
+    'Guaranda',
+    'Magangue',
+    'Majagual',
+    'Maranatha',
+    'Maria la Baja',
+    'Monteria Central',
+    'Monteria Occidental',
+    'Montes de Maria',
+    'Plato',
+    'Sabana',
+    'San Jorge',
+    'San Juan',
+    'San Sebastian',
+    'Sinu Central',
+    'Sincelejo Central',
+    'Sincelejo Norte',
+    'Sucre',
+    'Turbaco',
+    'T/A Occidental',
+    'T/A Central',
+    'Valencia',
+  ];
+
+  const districtData: Partial<DistrictEntity>[] = realDistrictNames.map(
+    (name) => ({ name, associationId: caribbeAssoc.id }),
+  );
+
+  // Also add generic districts for other associations
+  const otherAssociations = associations.filter(
+    (a) => a.id !== caribbeAssoc.id,
+  );
+  const genericDistrictNames = [
     ['Distrito Norte', 'Distrito Sur'],
     ['Distrito Este', 'Distrito Oeste'],
     ['Distrito Central', 'Distrito Montanas'],
@@ -146,27 +192,53 @@ async function runSeeds() {
     ['Distrito Sabana', 'Distrito Altiplano'],
     ['Distrito Magdalena Alto', 'Distrito Magdalena Bajo'],
     ['Distrito Cafetero Norte', 'Distrito Cafetero Sur'],
-    ['Distrito Occidental Norte', 'Distrito Occidental Sur'],
   ];
 
-  const districtData: Partial<DistrictEntity>[] = [];
-  for (let i = 0; i < associations.length; i++) {
-    const names = districtNames[i] || [`Distrito A-${i}`, `Distrito B-${i}`];
+  for (let i = 0; i < otherAssociations.length; i++) {
+    const names = genericDistrictNames[i] || [
+      `Distrito A-${i}`,
+      `Distrito B-${i}`,
+    ];
     for (const name of names) {
-      districtData.push({ name, associationId: associations[i].id });
+      districtData.push({ name, associationId: otherAssociations[i].id });
     }
   }
+
   const districts = await districtRepo.save(districtRepo.create(districtData));
   console.log(`${districts.length} distritos creados.`);
 
   // --- Seed Churches (3 per district) ---
   const churchSuffixes = [
-    'Central', 'El Faro', 'Esperanza', 'Luz del Mundo', 'El Camino',
-    'Fe y Vida', 'Nuevo Amanecer', 'Renacer', 'Bethel', 'El Redentor',
-    'Emanuel', 'Monte Sion', 'El Calvario', 'Getsemani', 'Ebenezer',
-    'Betel', 'Peniel', 'Sion', 'Horeb', 'Filadelfia',
-    'Esmirna', 'Antioqui', 'Nazaret', 'La Roca', 'El Buen Pastor',
-    'La Vid', 'Maranata', 'El Refugio', 'La Gracia', 'El Manantial',
+    'Central',
+    'El Faro',
+    'Esperanza',
+    'Luz del Mundo',
+    'El Camino',
+    'Fe y Vida',
+    'Nuevo Amanecer',
+    'Renacer',
+    'Bethel',
+    'El Redentor',
+    'Emanuel',
+    'Monte Sion',
+    'El Calvario',
+    'Getsemani',
+    'Ebenezer',
+    'Betel',
+    'Peniel',
+    'Sion',
+    'Horeb',
+    'Filadelfia',
+    'Esmirna',
+    'Antioqui',
+    'Nazaret',
+    'La Roca',
+    'El Buen Pastor',
+    'La Vid',
+    'Maranata',
+    'El Refugio',
+    'La Gracia',
+    'El Manantial',
   ];
 
   const churchData: Partial<ChurchEntity>[] = [];
@@ -191,57 +263,301 @@ async function runSeeds() {
   // --- Seed Users ---
   const passwordHash = await bcrypt.hash('demo1234', 12);
 
-  // Helper: get districts for an association
+  // Helper: find district by name
+  const findDistrict = (name: string) => districts.find((d) => d.name === name);
+
+  // Real pastors and ministers for Asociacion del Caribe Colombiano
+  const realPastors: {
+    district: string;
+    name: string;
+    position: string;
+    email: string;
+    phone: string;
+  }[] = [
+    {
+      district: 'Achi Bolivar',
+      name: 'Jairo Jose Soto Alvarez',
+      position: 'Ministro',
+      email: 'jairosotoa7@gmail.com',
+      phone: '316 388 8577',
+    },
+    {
+      district: 'Bajo Sinu',
+      name: 'Luis Gabriel Molina Cardenas',
+      position: 'Ministro',
+      email: 'mishbotigabriel@hotmail.com',
+      phone: '301 661 7837',
+    },
+    {
+      district: 'C/gena Bosque',
+      name: 'Jesus Alberto Fandino Rodriguez',
+      position: 'Pastor',
+      email: 'jafar63misioncaribe@hotmail.com',
+      phone: '311 660 0185',
+    },
+    {
+      district: 'C/gena Central',
+      name: 'Edgardo Enrique Carmona Olivares',
+      position: 'Ministro',
+      email: 'elied1528@hotmail.com',
+      phone: '311 660 0197',
+    },
+    {
+      district: 'C/gena Emaus',
+      name: 'Odma Elier Florez Paez',
+      position: 'Pastor',
+      email: 'odma77@hotmail.com',
+      phone: '311 660 0193',
+    },
+    {
+      district: 'C/gena Oriental',
+      name: 'Gilberto Jose Cabana Suarez',
+      position: 'Pastor',
+      email: 'pastorcentralad7@hotmail.com',
+      phone: '314 568 5747',
+    },
+    {
+      district: 'Carmen de Bolivar',
+      name: 'Ever Murillo Banqueth',
+      position: 'Ministro',
+      email: 'ever_murillo@hotmail.com',
+      phone: '310 351 0463',
+    },
+    {
+      district: 'C/gena Norte',
+      name: 'Fabian Jesus Blanco Ramos',
+      position: 'Pastor',
+      email: 'teamoms5@hotmail.com',
+      phone: '310 545 5787',
+    },
+    {
+      district: 'Chinu',
+      name: 'Lien Enrique Pineda Villadiego',
+      position: 'Pastor',
+      email: 'lien0874@hotmail.com',
+      phone: '311 660 0312',
+    },
+    {
+      district: 'Ebenezer',
+      name: 'Libardo Nicolas Cuesta Sarabia',
+      position: 'Pastor',
+      email: 'lcuestas67@hotmail.com',
+      phone: '314 874 1576',
+    },
+    {
+      district: 'Guaranda',
+      name: 'Edilberto Miguel Ospino Rivera',
+      position: 'Ministro',
+      email: 'eospino@unac.edu.co',
+      phone: '310 368 7640',
+    },
+    {
+      district: 'Magangue',
+      name: 'Damian Jose Castro Cervantes',
+      position: 'Pastor',
+      email: 'dajocacecom@gmail.com',
+      phone: '320 734 8226',
+    },
+    {
+      district: 'Majagual',
+      name: 'Beimer Manuel Negrete Ortiz',
+      position: 'Ministro',
+      email: 'bnegrete1@hotmail.com',
+      phone: '322 607 7270',
+    },
+    {
+      district: 'Maranatha',
+      name: 'David Enrique Mauris De la Osa',
+      position: 'Ministro',
+      email: 'mauryosa@gmail.com',
+      phone: '300 593 1815',
+    },
+    {
+      district: 'Maria la Baja',
+      name: 'Doiler Fidel Torres Davila',
+      position: 'Ministro',
+      email: 'doilerfidel89@hotmail.com',
+      phone: '312 675 3018',
+    },
+    {
+      district: 'Monteria Central',
+      name: 'Walmer Guzman Vergara',
+      position: 'Pastor',
+      email: 'wguzman@unac.edu.co',
+      phone: '312 660 0652',
+    },
+    {
+      district: 'Monteria Occidental',
+      name: 'Roberto Jose Leal Arrieta',
+      position: 'Ministro',
+      email: 'robertoleal65@hotmail.es',
+      phone: '322 783 6267',
+    },
+    {
+      district: 'Montes de Maria',
+      name: 'Yorman Enrique Tamara Diaz',
+      position: 'Ministro',
+      email: 'yetd_32@hotmail.com',
+      phone: '312 200 3103',
+    },
+    {
+      district: 'Plato',
+      name: 'Armando Torres Acosta',
+      position: 'Ministro',
+      email: 'gomita21_@hotmail.com',
+      phone: '320 362 7173',
+    },
+    {
+      district: 'Sabana',
+      name: 'Franco Aldair Ramos Jimenez',
+      position: 'Pastor',
+      email: 'elgranzebu@gmail.com',
+      phone: '313 645 5102',
+    },
+    {
+      district: 'San Jorge',
+      name: 'Juan Eudes Gallego Sanchez',
+      position: 'Pastor',
+      email: 'jugalio274@hotmail.com',
+      phone: '321 779 9987',
+    },
+    {
+      district: 'San Juan',
+      name: 'Andres Mauricio Restrepo Jimenez',
+      position: 'Ministro',
+      email: 'arestrepojimenez@gmail.com',
+      phone: '314 561 3891',
+    },
+    {
+      district: 'San Sebastian',
+      name: 'Joel Jose Doria Doria',
+      position: 'Pastor',
+      email: 'ilseatencia@gmail.com',
+      phone: '311 660 0195',
+    },
+    {
+      district: 'Sinu Central',
+      name: 'Diego Fernando Doria Ramos',
+      position: 'Ministro',
+      email: 'diegofdoriar98@outlook.com',
+      phone: '320 510 5341',
+    },
+    {
+      district: 'Sincelejo Central',
+      name: 'Edwin Jose Diaz Castellar',
+      position: 'Pastor',
+      email: 'viviyedwin@hotmail.com',
+      phone: '311 660 0183',
+    },
+    {
+      district: 'Sincelejo Norte',
+      name: 'Over Luis Pena Jimenez',
+      position: 'Pastor',
+      email: 'over_pena@hotmail.com',
+      phone: '314 547 1322',
+    },
+    {
+      district: 'Sucre',
+      name: 'Luis Carlos Perez Macias',
+      position: 'Ministro',
+      email: 'lperezmacia@gmail.com',
+      phone: '313 880 8311',
+    },
+    {
+      district: 'Turbaco',
+      name: 'Jose David Rocha Velasquez',
+      position: 'Ministro',
+      email: 'davidrochavr7@gmail.com',
+      phone: '322 305 8275',
+    },
+    {
+      district: 'T/A Occidental',
+      name: 'Wilfrido Mejia Torres',
+      position: 'Ministro',
+      email: 'wilmejia@unac.edu.co',
+      phone: '318 543 3126',
+    },
+    {
+      district: 'T/A Central',
+      name: 'Jaminson Romana Romana',
+      position: 'Pastor',
+      email: 'jromana25@hotmail.com',
+      phone: '321 638 8561',
+    },
+    {
+      district: 'Valencia',
+      name: 'Jose Daniel Puentes Rocha',
+      position: 'Ministro',
+      email: 'jpuentesrocha@hotmail.com',
+      phone: '310 801 1499',
+    },
+  ];
+
+  const userData: Partial<UserEntity>[] = [];
+
+  // Create real pastors/ministers for Caribe association
+  for (const pastor of realPastors) {
+    const district = findDistrict(pastor.district);
+    userData.push({
+      name: pastor.name,
+      email: pastor.email.toLowerCase(),
+      role: UserRole.PASTOR,
+      passwordHash,
+      associationId: caribbeAssoc.id,
+      districtId: district?.id ?? null,
+      position: pastor.position,
+      phone: pastor.phone,
+    });
+  }
+
+  // Generic pastors for other associations (one per district)
   const getDistrictsForAssociation = (assocId: string) =>
     districts.filter((d) => d.associationId === assocId);
 
-  // Pastor names pool
-  const pastorNames = [
-    'Ptr. Carlos Mendoza', 'Ptr. Maria Gonzalez', 'Ptr. Juan Perez',
-    'Ptr. Ana Rodriguez', 'Ptr. Luis Herrera', 'Ptr. Sofia Castro',
-    'Ptr. Diego Ramirez', 'Ptr. Laura Torres', 'Ptr. Andres Morales',
-    'Ptr. Carmen Vargas', 'Ptr. Pedro Ortiz', 'Ptr. Claudia Rios',
-    'Ptr. Fernando Silva', 'Ptr. Patricia Nunez', 'Ptr. Roberto Diaz',
-    'Ptr. Isabel Mejia', 'Ptr. Alejandro Pena', 'Ptr. Daniela Cruz',
-    'Ptr. Ricardo Salazar', 'Ptr. Monica Gutierrez', 'Ptr. Gabriel Leon',
-    'Ptr. Valentina Romero', 'Ptr. Santiago Cardenas', 'Ptr. Natalia Aguilar',
-    'Ptr. Oscar Zambrano', 'Ptr. Camila Paredes', 'Ptr. Julio Espinoza',
-    'Ptr. Angela Contreras', 'Ptr. Enrique Soto', 'Ptr. Melissa Acosta',
+  const genericPastorNames = [
+    'Carlos Mendoza',
+    'Maria Gonzalez',
+    'Juan Perez',
+    'Ana Rodriguez',
+    'Luis Herrera',
+    'Sofia Castro',
+    'Diego Ramirez',
+    'Laura Torres',
+    'Andres Morales',
+    'Carmen Vargas',
+    'Pedro Ortiz',
+    'Claudia Rios',
+    'Fernando Silva',
+    'Patricia Nunez',
+    'Roberto Diaz',
+    'Isabel Mejia',
+    'Alejandro Pena',
+    'Daniela Cruz',
   ];
+  let genericIdx = 0;
 
-  let pastorIndex = 0;
-  const userData: Partial<UserEntity>[] = [];
-
-  // Generate 2-3 pastors per association (one per district)
-  for (let assocIdx = 0; assocIdx < associations.length; assocIdx++) {
-    const assoc = associations[assocIdx];
+  for (const assoc of otherAssociations) {
     const assocDistricts = getDistrictsForAssociation(assoc.id);
-
     for (const district of assocDistricts) {
-      if (pastorIndex >= pastorNames.length) break;
-      const emailPrefix = pastorNames[pastorIndex]
-        .replace('Ptr. ', '')
-        .toLowerCase()
-        .replace(/ /g, '.');
+      if (genericIdx >= genericPastorNames.length) break;
+      const name = genericPastorNames[genericIdx];
+      const emailPrefix = name.toLowerCase().replace(/ /g, '.');
       userData.push({
-        name: pastorNames[pastorIndex],
+        name,
         email: `${emailPrefix}@demo.com`,
         role: UserRole.PASTOR,
         passwordHash,
         associationId: assoc.id,
         districtId: district.id,
+        position: genericIdx % 2 === 0 ? 'Pastor' : 'Ministro',
+        phone: null,
       });
-      pastorIndex++;
+      genericIdx++;
     }
   }
 
-  // Override first pastor email to keep demo credentials
-  const firstPastorEntry = userData.find((u) =>
-    u.name === 'Ptr. Carlos Mendoza',
-  );
-  if (firstPastorEntry) {
-    firstPastorEntry.email = 'pastor@demo.com';
-  }
+  // Keep demo credentials: override first real pastor email
+  userData[0].email = 'pastor@demo.com';
 
   // Admin for main association (Asociacion del Caribe Colombiano)
   userData.push({
@@ -249,7 +565,9 @@ async function runSeeds() {
     email: 'admin@demo.com',
     role: UserRole.ADMIN,
     passwordHash,
-    associationId: associations[0].id,
+    associationId: caribbeAssoc.id,
+    position: null,
+    phone: null,
   });
 
   // Super admins
@@ -259,6 +577,8 @@ async function runSeeds() {
     role: UserRole.SUPER_ADMIN,
     passwordHash,
     unionId: unionNorte.id,
+    position: null,
+    phone: null,
   });
   userData.push({
     name: 'Super Admin Sur',
@@ -266,6 +586,8 @@ async function runSeeds() {
     role: UserRole.SUPER_ADMIN,
     passwordHash,
     unionId: unionSur.id,
+    position: null,
+    phone: null,
   });
 
   const users = await userRepo.save(userRepo.create(userData));
@@ -310,8 +632,7 @@ async function runSeeds() {
         const usedSubcats = new Set<string>();
 
         for (let i = 0; i < numActivities; i++) {
-          const cat =
-            categories[Math.floor(Math.random() * categories.length)];
+          const cat = categories[Math.floor(Math.random() * categories.length)];
           const subcat =
             cat.subcategories[
               Math.floor(Math.random() * cat.subcategories.length)

@@ -41,4 +41,8 @@ export class AuthTokenResponseDto {
   @ApiPropertyOptional({ example: 19, description: 'Dia limite de reporte de la asociacion' })
   @Expose()
   reportDeadlineDay?: number;
+
+  @ApiPropertyOptional({ example: 'Pastor' })
+  @Expose()
+  position?: string;
 }

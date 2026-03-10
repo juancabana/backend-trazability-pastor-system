@@ -32,4 +32,16 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUUID()
   districtId?: string;
+
+  @ApiPropertyOptional({ example: 'Pastor' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  position?: string;
+
+  @ApiPropertyOptional({ example: '311 660 0185' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  phone?: string;
 }

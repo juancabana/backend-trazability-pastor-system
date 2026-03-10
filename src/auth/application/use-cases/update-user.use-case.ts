@@ -18,6 +18,8 @@ export class UpdateUserUseCase {
     if (dto.name) updates.name = dto.name.trim();
     if (dto.role) updates.role = dto.role;
     if (dto.districtId !== undefined) updates.districtId = dto.districtId;
+    if (dto.position !== undefined) updates.position = dto.position;
+    if (dto.phone !== undefined) updates.phone = dto.phone;
     if (dto.password)
       updates.passwordHash = await bcrypt.hash(dto.password, 12);
 
@@ -34,6 +36,8 @@ export class UpdateUserUseCase {
       associationId: updated.associationId,
       districtId: updated.districtId,
       unionId: updated.unionId,
+      position: updated.position,
+      phone: updated.phone,
       createdAt: updated.createdAt,
     };
   }

@@ -32,6 +32,12 @@ export class UserEntity {
   @Column({ type: 'uuid', nullable: true })
   unionId: string | null;
 
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  position: string | null;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  phone: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 }

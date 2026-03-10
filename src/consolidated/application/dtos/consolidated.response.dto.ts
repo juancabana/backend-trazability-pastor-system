@@ -55,6 +55,9 @@ export class PastorSummaryDto {
   @ApiPropertyOptional()
   districtName: string | null;
 
+  @ApiPropertyOptional()
+  position: string | null;
+
   @ApiProperty()
   totalReports: number;
 

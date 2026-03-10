@@ -146,6 +146,7 @@ export class GetConsolidatedByAssociationUseCase {
         districtName: p.districtId
           ? districtMap.get(p.districtId) ?? ''
           : '',
+        position: p.position,
         totalReports: stats.totalReports,
         totalActivities: stats.totalActivities,
         totalHours: Math.round(stats.totalHours * 10) / 10,
