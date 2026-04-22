@@ -11,6 +11,7 @@ export const databaseConfig = registerAs(
     password: process.env.DB_PASSWORD ?? '',
     database: process.env.DB_DATABASE ?? '',
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+    subscribers: [__dirname + '/../config/*.subscriber{.ts,.js}'],
     synchronize: process.env.NODE_ENV !== 'production',
     logging: process.env.NODE_ENV === 'development',
     extra: {
@@ -19,9 +20,6 @@ export const databaseConfig = registerAs(
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
     },
-    ssl:
-      process.env.NODE_ENV === 'production'
-        ? { rejectUnauthorized: false }
-        : undefined,
+    ssl: { rejectUnauthorized: false },
   }),
 );
