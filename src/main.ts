@@ -7,10 +7,22 @@ import { GlobalExceptionFilter } from './common/filters/http-exception.filter.js
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const corsOrigin = isProduction
+    ? (process.env.FRONTEND_URL || '').split(',').map((url) => url.trim())
+    : [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:5173',
+        'http://127.0.0.1:3000',
+      ];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? '*',
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 3600,
   });
 
   app.useGlobalFilters(new GlobalExceptionFilter());
