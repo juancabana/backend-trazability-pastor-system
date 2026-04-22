@@ -2,38 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssociationEntity } from '../../domain/entities/association.entity.js';
+import { BaseRepository } from '../../../common/repositories/base.repository.js';
 
 @Injectable()
-export class AssociationRepository {
+export class AssociationRepository extends BaseRepository<AssociationEntity> {
   constructor(
     @InjectRepository(AssociationEntity)
-    private readonly repo: Repository<AssociationEntity>,
-  ) {}
+    repo: Repository<AssociationEntity>,
+  ) {
+    super(repo);
+  }
 
-  async findAll(): Promise<AssociationEntity[]> {
+  findAll(): Promise<AssociationEntity[]> {
     return this.repo.find({ order: { name: 'ASC' } });
   }
 
-  async findById(id: string): Promise<AssociationEntity | null> {
-    return this.repo.findOne({ where: { id } });
-  }
-
-  async findByUnion(unionId: string): Promise<AssociationEntity[]> {
+  findByUnion(unionId: string): Promise<AssociationEntity[]> {
     return this.repo.find({ where: { unionId }, order: { name: 'ASC' } });
-  }
-
-  async create(
-    data: Partial<AssociationEntity>,
-  ): Promise<AssociationEntity> {
-    const entity = this.repo.create(data);
-    return this.repo.save(entity);
-  }
-
-  async update(
-    id: string,
-    data: Partial<AssociationEntity>,
-  ): Promise<AssociationEntity | null> {
-    await this.repo.update(id, data);
-    return this.findById(id);
   }
 }

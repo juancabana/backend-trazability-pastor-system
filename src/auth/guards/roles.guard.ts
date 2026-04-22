@@ -2,12 +2,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole } from '../../common/enums/user-role.enum.js';
 import { ROLES_KEY } from '../decorators/roles.decorator.js';
-
-const ROLE_HIERARCHY: Record<string, number> = {
-  [UserRole.PASTOR]: 0,
-  [UserRole.ADMIN]: 1,
-  [UserRole.SUPER_ADMIN]: 2,
-};
+import { ROLE_HIERARCHY } from '../../config/constants.js';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

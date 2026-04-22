@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { JWT_EXPIRY } from '../config/constants.js';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './domain/entities/user.entity.js';
@@ -32,7 +33,7 @@ import { AuthController } from './presentation/auth.controller.js';
         }
         return {
           secret,
-          signOptions: { expiresIn: '7d' },
+          signOptions: { expiresIn: JWT_EXPIRY },
         };
       },
     }),

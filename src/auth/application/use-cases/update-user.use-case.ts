@@ -3,6 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import { UserRepository } from '../../infrastructure/repositories/user.repository.js';
 import { UpdateUserDto } from '../dtos/update-user.dto.js';
 import { UserResponseDto } from '../dtos/user.response.dto.js';
+import { BCRYPT_ROUNDS } from '../../../config/constants.js';
 
 @Injectable()
 export class UpdateUserUseCase {
@@ -21,24 +22,13 @@ export class UpdateUserUseCase {
     if (dto.position !== undefined) updates.position = dto.position;
     if (dto.phone !== undefined) updates.phone = dto.phone;
     if (dto.password)
-      updates.passwordHash = await bcrypt.hash(dto.password, 12);
+      updates.passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
 
     const updated = await this.userRepo.update(id, updates);
     if (!updated) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    return {
-      id: updated.id,
-      name: updated.name,
-      email: updated.email,
-      role: updated.role,
-      associationId: updated.associationId,
-      districtId: updated.districtId,
-      unionId: updated.unionId,
-      position: updated.position,
-      phone: updated.phone,
-      createdAt: updated.createdAt,
-    };
+    return UserResponseDto.fromEntity(updated);
   }
 }

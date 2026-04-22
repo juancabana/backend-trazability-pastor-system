@@ -2,43 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DistrictEntity } from '../../domain/entities/district.entity.js';
+import { BaseRepository } from '../../../common/repositories/base.repository.js';
 
 @Injectable()
-export class DistrictRepository {
+export class DistrictRepository extends BaseRepository<DistrictEntity> {
   constructor(
     @InjectRepository(DistrictEntity)
-    private readonly repo: Repository<DistrictEntity>,
-  ) {}
+    repo: Repository<DistrictEntity>,
+  ) {
+    super(repo);
+  }
 
-  async findAll(): Promise<DistrictEntity[]> {
+  findAll(): Promise<DistrictEntity[]> {
     return this.repo.find({ order: { name: 'ASC' } });
   }
 
-  async findByAssociation(associationId: string): Promise<DistrictEntity[]> {
+  findByAssociation(associationId: string): Promise<DistrictEntity[]> {
     return this.repo.find({
       where: { associationId },
       order: { name: 'ASC' },
     });
-  }
-
-  async findById(id: string): Promise<DistrictEntity | null> {
-    return this.repo.findOne({ where: { id } });
-  }
-
-  async create(data: Partial<DistrictEntity>): Promise<DistrictEntity> {
-    const entity = this.repo.create(data);
-    return this.repo.save(entity);
-  }
-
-  async update(
-    id: string,
-    data: Partial<DistrictEntity>,
-  ): Promise<DistrictEntity | null> {
-    await this.repo.update(id, data);
-    return this.findById(id);
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.repo.delete(id);
   }
 }

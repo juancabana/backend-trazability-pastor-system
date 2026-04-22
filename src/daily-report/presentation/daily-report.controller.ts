@@ -1,10 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   Request,
@@ -28,6 +28,7 @@ import { GetReportByPastorAndDateUseCase } from '../application/use-cases/get-re
 import { DeleteReportUseCase } from '../application/use-cases/delete-report.use-case.js';
 import { CreateDailyReportDto } from '../application/dtos/create-daily-report.dto.js';
 import { DailyReportResponseDto } from '../application/dtos/daily-report.response.dto.js';
+import { parseMonth, parseYear } from '../../common/utils/date-range.util.js';
 
 @ApiTags('daily-reports')
 @Controller('daily-reports')
@@ -64,26 +65,14 @@ export class DailyReportController {
   @ApiQuery({ name: 'year', required: false, type: Number })
   @ApiResponse({ status: 200, type: [DailyReportResponseDto] })
   getByPastor(
-    @Param('pastorId') pastorId: string,
+    @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
     @Query('month') month?: string,
     @Query('year') year?: string,
   ): Promise<DailyReportResponseDto[]> {
-    if (month) {
-      const m = parseInt(month);
-      if (isNaN(m) || m < 1 || m > 12) {
-        throw new BadRequestException('month debe ser un numero entre 1 y 12');
-      }
-    }
-    if (year) {
-      const y = parseInt(year);
-      if (isNaN(y) || y < 2000 || y > 2100) {
-        throw new BadRequestException('year debe ser un numero valido');
-      }
-    }
     return this.getReportsByPastorUseCase.execute(
       pastorId,
-      month ? parseInt(month) : undefined,
-      year ? parseInt(year) : undefined,
+      month ? parseMonth(month) : undefined,
+      year ? parseYear(year) : undefined,
     );
   }
 
@@ -93,7 +82,7 @@ export class DailyReportController {
   @ApiOperation({ summary: 'Obtener reporte por pastor y fecha' })
   @ApiResponse({ status: 200, type: DailyReportResponseDto })
   getByPastorAndDate(
-    @Param('pastorId') pastorId: string,
+    @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
     @Param('date') date: string,
   ): Promise<DailyReportResponseDto> {
     return this.getReportByPastorAndDateUseCase.execute(pastorId, date);
@@ -105,7 +94,7 @@ export class DailyReportController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar reporte diario (pastor, periodo actual)' })
   @ApiResponse({ status: 200 })
-  delete(@Param('id') id: string, @Request() req: { user: JwtPayload }): Promise<void> {
+  delete(@Param('id', new ParseUUIDPipe()) id: string, @Request() req: { user: JwtPayload }): Promise<void> {
     return this.deleteReportUseCase.execute(
       id,
       req.user.sub,

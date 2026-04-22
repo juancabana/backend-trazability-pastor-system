@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   UseGuards,
@@ -57,7 +58,7 @@ export class UnionController {
   @ApiOperation({ summary: 'Actualizar union (super_admin)' })
   @ApiResponse({ status: 200, type: UnionResponseDto })
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUnionDto,
   ): Promise<UnionResponseDto> {
     return this.updateUnionUseCase.execute(id, dto);

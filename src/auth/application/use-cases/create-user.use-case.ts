@@ -3,6 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import { UserRepository } from '../../infrastructure/repositories/user.repository.js';
 import { CreateUserDto } from '../dtos/create-user.dto.js';
 import { UserResponseDto } from '../dtos/user.response.dto.js';
+import { BCRYPT_ROUNDS } from '../../../config/constants.js';
 
 @Injectable()
 export class CreateUserUseCase {
@@ -16,7 +17,7 @@ export class CreateUserUseCase {
       throw new ConflictException('Ya existe un usuario con ese email');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     const user = await this.userRepo.create({
       name: dto.name.trim(),
       email: dto.email.toLowerCase().trim(),
@@ -29,17 +30,6 @@ export class CreateUserUseCase {
       phone: dto.phone ?? null,
     });
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      associationId: user.associationId,
-      districtId: user.districtId,
-      unionId: user.unionId,
-      position: user.position,
-      phone: user.phone,
-      createdAt: user.createdAt,
-    };
+    return UserResponseDto.fromEntity(user);
   }
 }
