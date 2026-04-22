@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -65,7 +66,7 @@ export class DistrictController {
   @ApiOperation({ summary: 'Actualizar distrito (admin)' })
   @ApiResponse({ status: 200, type: DistrictResponseDto })
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateDistrictDto,
   ): Promise<DistrictResponseDto> {
     return this.updateDistrictUseCase.execute(id, dto);
@@ -76,7 +77,7 @@ export class DistrictController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar distrito (admin, sin iglesias/pastores)' })
-  delete(@Param('id') id: string): Promise<void> {
+  delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.deleteDistrictUseCase.execute(id);
   }
 }

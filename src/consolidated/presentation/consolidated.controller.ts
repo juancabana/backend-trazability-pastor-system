@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -20,22 +20,11 @@ import {
   ConsolidatedResponseDto,
   AssociationConsolidatedResponseDto,
 } from '../application/dtos/consolidated.response.dto.js';
+import { validateMonthYear } from '../../common/utils/date-range.util.js';
 
 @ApiTags('consolidated')
 @Controller('consolidated')
 export class ConsolidatedController {
-  private validateMonthYear(month: string, year: string): { m: number; y: number } {
-    const m = parseInt(month);
-    const y = parseInt(year);
-    if (isNaN(m) || m < 1 || m > 12) {
-      throw new BadRequestException('month debe ser un numero entre 1 y 12');
-    }
-    if (isNaN(y) || y < 2000 || y > 2100) {
-      throw new BadRequestException('year debe ser un numero valido');
-    }
-    return { m, y };
-  }
-
   constructor(
     private readonly getByPastorUseCase: GetConsolidatedByPastorUseCase,
     private readonly getByAssociationUseCase: GetConsolidatedByAssociationUseCase,
@@ -50,11 +39,11 @@ export class ConsolidatedController {
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiResponse({ status: 200, type: ConsolidatedResponseDto })
   getByPastor(
-    @Param('pastorId') pastorId: string,
+    @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
     @Query('month') month: string,
     @Query('year') year: string,
   ): Promise<ConsolidatedResponseDto> {
-    const { m, y } = this.validateMonthYear(month, year);
+    const { m, y } = validateMonthYear(month, year);
     return this.getByPastorUseCase.execute(pastorId, m, y);
   }
 
@@ -67,11 +56,11 @@ export class ConsolidatedController {
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
   getByAssociation(
-    @Param('associationId') associationId: string,
+    @Param('associationId', new ParseUUIDPipe()) associationId: string,
     @Query('month') month: string,
     @Query('year') year: string,
   ): Promise<AssociationConsolidatedResponseDto> {
-    const { m, y } = this.validateMonthYear(month, year);
+    const { m, y } = validateMonthYear(month, year);
     return this.getByAssociationUseCase.execute(associationId, m, y);
   }
 
@@ -83,11 +72,11 @@ export class ConsolidatedController {
   @ApiQuery({ name: 'month', required: true, type: Number })
   @ApiQuery({ name: 'year', required: true, type: Number })
   getByUnion(
-    @Param('unionId') unionId: string,
+    @Param('unionId', new ParseUUIDPipe()) unionId: string,
     @Query('month') month: string,
     @Query('year') year: string,
   ): Promise<UnionConsolidatedResponseDto> {
-    const { m, y } = this.validateMonthYear(month, year);
+    const { m, y } = validateMonthYear(month, year);
     return this.getByUnionUseCase.execute(unionId, m, y);
   }
 }

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -66,7 +67,7 @@ export class ChurchController {
   @ApiOperation({ summary: 'Actualizar iglesia (admin)' })
   @ApiResponse({ status: 200, type: ChurchResponseDto })
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateChurchDto,
   ): Promise<ChurchResponseDto> {
     return this.updateChurchUseCase.execute(id, dto);
@@ -79,7 +80,7 @@ export class ChurchController {
   @ApiOperation({ summary: 'Mover iglesia a otro distrito (admin)' })
   @ApiResponse({ status: 200, type: ChurchResponseDto })
   move(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: MoveChurchDto,
   ): Promise<ChurchResponseDto> {
     return this.updateChurchUseCase.move(id, dto);
@@ -90,7 +91,7 @@ export class ChurchController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar iglesia (admin)' })
-  delete(@Param('id') id: string): Promise<void> {
+  delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.deleteChurchUseCase.execute(id);
   }
 }

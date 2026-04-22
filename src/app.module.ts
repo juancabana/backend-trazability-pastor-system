@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { databaseConfig } from './config/database.config.js';
+import { THROTTLE_TTL, THROTTLE_LIMIT } from './config/constants.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AssociationModule } from './association/association.module.js';
 import { DistrictModule } from './district/district.module.js';
@@ -28,7 +29,7 @@ import { AppService } from './app.service.js';
       useFactory: (configService: ConfigService): TypeOrmModuleOptions =>
         configService.getOrThrow<TypeOrmModuleOptions>('database'),
     }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 30 }]),
+    ThrottlerModule.forRoot([{ ttl: THROTTLE_TTL, limit: THROTTLE_LIMIT }]),
     AuthModule,
     AssociationModule,
     DistrictModule,

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -49,7 +49,7 @@ export class AssociationController {
   @ApiOperation({ summary: 'Actualizar asociacion (admin)' })
   @ApiResponse({ status: 200, type: AssociationResponseDto })
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateAssociationDto,
   ): Promise<AssociationResponseDto> {
     return this.updateAssociationUseCase.execute(id, dto);

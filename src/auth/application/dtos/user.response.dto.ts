@@ -41,4 +41,30 @@ export class UserResponseDto {
   @ApiProperty()
   @Expose()
   createdAt: Date;
+
+  static fromEntity(u: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    associationId: string | null;
+    districtId: string | null;
+    unionId: string | null;
+    position: string | null;
+    phone: string | null;
+    createdAt: Date;
+  }): UserResponseDto {
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      associationId: u.associationId,
+      districtId: u.districtId,
+      unionId: u.unionId,
+      position: u.position,
+      phone: u.phone,
+      createdAt: u.createdAt,
+    };
+  }
 }

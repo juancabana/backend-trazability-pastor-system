@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -21,6 +22,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import { RolesGuard } from '../guards/roles.guard.js';
 import { Roles } from '../decorators/roles.decorator.js';
 import { Throttle } from '@nestjs/throttler';
+import { THROTTLE_LOGIN_TTL, THROTTLE_LOGIN_LIMIT } from '../../config/constants.js';
 import { UserRole } from '../../common/enums/user-role.enum.js';
 import type { JwtPayload } from '../infrastructure/strategies/jwt.strategy.js';
 import { LoginUseCase } from '../application/use-cases/login.use-case.js';
@@ -46,7 +48,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @Throttle({ default: { ttl: THROTTLE_LOGIN_TTL, limit: THROTTLE_LOGIN_LIMIT } })
   @ApiOperation({ summary: 'Autenticacion de usuario' })
   @ApiResponse({ status: 200, type: AuthTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Credenciales invalidas' })
@@ -96,7 +98,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Actualizar usuario (admin)' })
   @ApiResponse({ status: 200, type: UserResponseDto })
   updateUser(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
   ): Promise<UserResponseDto> {
     return this.updateUserUseCase.execute(id, dto);
@@ -108,7 +110,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar usuario (admin)' })
   @ApiResponse({ status: 200 })
-  deleteUser(@Param('id') id: string): Promise<void> {
+  deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.deleteUserUseCase.execute(id);
   }
 }
