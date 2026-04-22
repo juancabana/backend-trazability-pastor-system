@@ -28,8 +28,10 @@ export function formatMonthRange(
   month: number,
 ): { startDate: string; endDate: string } {
   const mm = String(month).padStart(2, '0');
+  const lastDayOfMonth = new Date(year, month, 0).getDate();
+  const dd = String(lastDayOfMonth).padStart(2, '0');
   return {
     startDate: `${year}-${mm}-01`,
-    endDate: `${year}-${mm}-31`,
+    endDate: `${year}-${mm}-${dd}`,
   };
 }
