@@ -56,4 +56,12 @@ export class AuthTokenResponseDto {
   })
   @Expose()
   mustChangePassword: boolean;
+
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'Permite al pastor editar informes de cualquier periodo vencido',
+  })
+  @Expose()
+  canEditAllReports?: boolean;
 }

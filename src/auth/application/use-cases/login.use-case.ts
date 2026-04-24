@@ -61,6 +61,7 @@ export class LoginUseCase {
       reportDeadlineDay,
       position: user.position ?? undefined,
       mustChangePassword: user.mustChangePassword,
+      canEditAllReports: user.canEditAllReports,
     };
   }
 }

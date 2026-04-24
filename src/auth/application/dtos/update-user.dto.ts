@@ -1,6 +1,7 @@
 import {
   IsString,
   IsOptional,
+  IsBoolean,
   MinLength,
   MaxLength,
   IsEnum,
@@ -44,4 +45,13 @@ export class UpdateUserDto {
   @IsString()
   @MaxLength(20)
   phone?: string;
+
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'Permite al pastor editar informes de cualquier periodo vencido',
+  })
+  @IsOptional()
+  @IsBoolean()
+  canEditAllReports?: boolean;
 }

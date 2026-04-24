@@ -41,6 +41,9 @@ export class UserEntity {
   @Column({ type: 'boolean', default: true })
   mustChangePassword: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  canEditAllReports: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 }
