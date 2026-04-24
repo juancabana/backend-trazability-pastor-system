@@ -38,11 +38,22 @@ export class AuthTokenResponseDto {
   @Expose()
   unionName?: string;
 
-  @ApiPropertyOptional({ example: 19, description: 'Dia limite de reporte de la asociacion' })
+  @ApiPropertyOptional({
+    example: 19,
+    description: 'Dia limite de reporte de la asociacion',
+  })
   @Expose()
   reportDeadlineDay?: number;
 
   @ApiPropertyOptional({ example: 'Pastor' })
   @Expose()
   position?: string;
+
+  @ApiProperty({
+    example: false,
+    description:
+      'Indica si el usuario debe cambiar su contraseña al iniciar sesión',
+  })
+  @Expose()
+  mustChangePassword: boolean;
 }

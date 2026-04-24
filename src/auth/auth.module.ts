@@ -16,6 +16,7 @@ import { GetUsersUseCase } from './application/use-cases/get-users.use-case.js';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case.js';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case.js';
 import { DeleteUserUseCase } from './application/use-cases/delete-user.use-case.js';
+import { ChangeOwnPasswordUseCase } from './application/use-cases/change-own-password.use-case.js';
 import { RolesGuard } from './guards/roles.guard.js';
 import { AuthController } from './presentation/auth.controller.js';
 
@@ -49,6 +50,7 @@ import { AuthController } from './presentation/auth.controller.js';
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    ChangeOwnPasswordUseCase,
     RolesGuard,
   ],
   exports: [JwtModule, RolesGuard, UserRepository],

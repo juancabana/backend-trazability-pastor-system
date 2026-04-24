@@ -38,6 +38,9 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
+  @Column({ type: 'boolean', default: true })
+  mustChangePassword: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 }
