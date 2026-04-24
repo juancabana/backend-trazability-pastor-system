@@ -59,7 +59,7 @@ export class AuthController {
 
   @Get('users')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN_READONLY)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar usuarios (filtrable por asociacion, paginable)' })
   @ApiQuery({ name: 'associationId', required: false })
