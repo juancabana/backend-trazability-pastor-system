@@ -49,9 +49,9 @@ export class ConsolidatedController {
 
   @Get('association/:associationId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN_READONLY)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Consolidado por asociacion (admin, mes/ano)' })
+  @ApiOperation({ summary: 'Consolidado por asociacion (admin/readonly, mes/ano)' })
   @ApiQuery({ name: 'month', required: true, type: Number })
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })

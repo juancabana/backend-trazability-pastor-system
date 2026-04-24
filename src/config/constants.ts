@@ -11,6 +11,7 @@ export const THROTTLE_LOGIN_LIMIT = 5;
 
 export const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.PASTOR]: 0,
-  [UserRole.ADMIN]: 1,
-  [UserRole.SUPER_ADMIN]: 2,
+  [UserRole.ADMIN_READONLY]: 1,
+  [UserRole.ADMIN]: 2,
+  [UserRole.SUPER_ADMIN]: 3,
 };
