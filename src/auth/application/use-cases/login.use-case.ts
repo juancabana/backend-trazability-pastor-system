@@ -60,6 +60,7 @@ export class LoginUseCase {
       unionName,
       reportDeadlineDay,
       position: user.position ?? undefined,
+      mustChangePassword: user.mustChangePassword,
     };
   }
 }

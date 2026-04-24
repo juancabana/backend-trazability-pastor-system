@@ -21,8 +21,10 @@ export class UpdateUserUseCase {
     if (dto.districtId !== undefined) updates.districtId = dto.districtId;
     if (dto.position !== undefined) updates.position = dto.position;
     if (dto.phone !== undefined) updates.phone = dto.phone;
-    if (dto.password)
+    if (dto.password) {
       updates.passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+      updates.mustChangePassword = true;
+    }
 
     const updated = await this.userRepo.update(id, updates);
     if (!updated) {
