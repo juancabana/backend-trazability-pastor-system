@@ -55,4 +55,13 @@ export class UserRepository extends BaseRepository<UserEntity> {
       order: { createdAt: 'ASC' },
     });
   }
+
+  findByIds(ids: string[]): Promise<UserEntity[]> {
+    if (ids.length === 0) return Promise.resolve([]);
+    return this.repo
+      .createQueryBuilder('user')
+      .where('user.id IN (:...ids)', { ids })
+      .orderBy('user.createdAt', 'ASC')
+      .getMany();
+  }
 }
