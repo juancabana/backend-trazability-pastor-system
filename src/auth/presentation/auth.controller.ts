@@ -42,6 +42,7 @@ import { CreateUserDto } from '../application/dtos/create-user.dto.js';
 import { UpdateUserDto } from '../application/dtos/update-user.dto.js';
 import { UserResponseDto } from '../application/dtos/user.response.dto.js';
 import { ChangeOwnPasswordDto } from '../application/dtos/change-own-password.dto.js';
+import { GetAdminRecipientsUseCase } from '../application/use-cases/get-admin-recipients.use-case.js';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -53,6 +54,7 @@ export class AuthController {
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly changeOwnPasswordUseCase: ChangeOwnPasswordUseCase,
+    private readonly getAdminRecipientsUseCase: GetAdminRecipientsUseCase,
   ) {}
 
   @Post('login')
@@ -150,5 +152,20 @@ export class AuthController {
   @ApiResponse({ status: 200 })
   deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
     return this.deleteUserUseCase.execute(id);
+  }
+
+  @Get('admin-recipients')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Listar administradores disponibles como destinatarios de correo',
+  })
+  @ApiQuery({ name: 'associationId', required: true, description: 'ID de la asociación' })
+  @ApiResponse({ status: 200, type: [UserResponseDto] })
+  getAdminRecipients(
+    @Query('associationId') associationId: string,
+  ): Promise<UserResponseDto[]> {
+    return this.getAdminRecipientsUseCase.execute(associationId);
   }
 }

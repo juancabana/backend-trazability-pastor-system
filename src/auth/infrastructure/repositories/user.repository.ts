@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../../domain/entities/user.entity.js';
 import { BaseRepository } from '../../../common/repositories/base.repository.js';
+import { UserRole } from '../../../common/enums/user-role.enum.js';
 
 @Injectable()
 export class UserRepository extends BaseRepository<UserEntity> {
@@ -63,5 +64,15 @@ export class UserRepository extends BaseRepository<UserEntity> {
       .where('user.id IN (:...ids)', { ids })
       .orderBy('user.createdAt', 'ASC')
       .getMany();
+  }
+
+  findAdminRecipients(associationId: string): Promise<UserEntity[]> {
+    return this.repo.find({
+      where: [
+        { associationId, role: UserRole.ADMIN },
+        { associationId, role: UserRole.ADMIN_READONLY },
+      ],
+      order: { name: 'ASC' },
+    });
   }
 }

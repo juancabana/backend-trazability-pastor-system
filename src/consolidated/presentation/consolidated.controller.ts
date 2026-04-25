@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -22,6 +22,11 @@ import {
   AssociationConsolidatedResponseDto,
 } from '../application/dtos/consolidated.response.dto.js';
 import { validateMonthYear } from '../../common/utils/date-range.util.js';
+import { SendConsolidatedReportUseCase } from '../application/use-cases/send-consolidated-report.use-case.js';
+import {
+  SendConsolidatedReportDto,
+  SendConsolidatedReportResponseDto,
+} from './dtos/send-consolidated-report.dto.js';
 
 @ApiTags('consolidated')
 @Controller('consolidated')
@@ -31,6 +36,7 @@ export class ConsolidatedController {
     private readonly getByAssociationUseCase: GetConsolidatedByAssociationUseCase,
     private readonly getByPastorsUseCase: GetConsolidatedByPastorsUseCase,
     private readonly getByUnionUseCase: GetConsolidatedByUnionUseCase,
+    private readonly sendReportUseCase: SendConsolidatedReportUseCase,
   ) {}
 
   @Get('pastor/:pastorId')
@@ -102,5 +108,21 @@ export class ConsolidatedController {
   ): Promise<UnionConsolidatedResponseDto> {
     const { m, y } = validateMonthYear(month, year);
     return this.getByUnionUseCase.execute(unionId, m, y);
+  }
+
+  @Post('send-report')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Enviar consolidado por correo a administradores seleccionados',
+  })
+  @ApiResponse({ status: 200, type: SendConsolidatedReportResponseDto })
+  @ApiResponse({ status: 400, description: 'Sin destinatarios o IDs inválidos' })
+  sendReport(
+    @Body() dto: SendConsolidatedReportDto,
+  ): Promise<SendConsolidatedReportResponseDto> {
+    return this.sendReportUseCase.execute(dto);
   }
 }
