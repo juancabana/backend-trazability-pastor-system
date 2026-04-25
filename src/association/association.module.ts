@@ -5,6 +5,7 @@ import { AssociationRepository } from './infrastructure/repositories/association
 import { GetAssociationsUseCase } from './application/use-cases/get-associations.use-case.js';
 import { CreateAssociationUseCase } from './application/use-cases/create-association.use-case.js';
 import { UpdateAssociationUseCase } from './application/use-cases/update-association.use-case.js';
+import { UpdateAssociationDeadlineUseCase } from './application/use-cases/update-association-deadline.use-case.js';
 import { AssociationController } from './presentation/association.controller.js';
 
 @Module({
@@ -15,6 +16,7 @@ import { AssociationController } from './presentation/association.controller.js'
     GetAssociationsUseCase,
     CreateAssociationUseCase,
     UpdateAssociationUseCase,
+    UpdateAssociationDeadlineUseCase,
   ],
   exports: [AssociationRepository],
 })

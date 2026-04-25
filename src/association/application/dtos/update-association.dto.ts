@@ -31,6 +31,6 @@ export class UpdateAssociationDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(28)
+  @Max(31)
   reportDeadlineDay?: number;
 }
