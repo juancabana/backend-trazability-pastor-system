@@ -29,7 +29,7 @@ export const COMPLIANCE_AMBER_THRESHOLD = 0.4;
 
 // Dia limite de reporte por defecto y maximo permitido.
 // Maximo 28 para evitar problemas con febrero.
-export const DEFAULT_REPORT_DEADLINE_DAY = 19;
+export const DEFAULT_REPORT_DEADLINE_DAY = 20;
 export const MAX_REPORT_DEADLINE_DAY = 28;
 export const MIN_REPORT_DEADLINE_DAY = 1;
 
