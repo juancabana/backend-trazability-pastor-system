@@ -1,7 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 import type { AssociationConsolidatedResponseDto } from '../consolidated/application/dtos/consolidated.response.dto.js';
 import { COMPLIANCE_THRESHOLD } from '../config/constants.js';
+import { isEmailEnabled } from '../config/feature-flags.js';
 
 const MONTHS_ES = [
   'Enero',
@@ -26,8 +32,23 @@ export interface EmailRecipient {
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
+  private readonly enabled: boolean;
 
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly config: ConfigService,
+  ) {
+    this.enabled = isEmailEnabled(this.config);
+    if (!this.enabled) {
+      this.logger.warn(
+        'EmailService deshabilitado (EMAIL_ENABLED=false). El envio de correos esta apagado.',
+      );
+    }
+  }
+
+  isEnabled(): boolean {
+    return this.enabled;
+  }
 
   async sendConsolidatedReport(
     recipients: EmailRecipient[],
@@ -35,6 +56,12 @@ export class EmailService {
     month: number,
     year: number,
   ): Promise<void> {
+    if (!this.enabled) {
+      throw new ServiceUnavailableException(
+        'El envio de correos esta deshabilitado. Configurar EMAIL_ENABLED=true y las variables MAIL_* para activarlo.',
+      );
+    }
+
     const monthLabel = MONTHS_ES[month - 1] ?? String(month);
     const subject = `Consolidado Pastoral – ${monthLabel} ${year}`;
 

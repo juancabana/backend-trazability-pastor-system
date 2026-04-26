@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { AppService } from './app.service.js';
 import {
   BUSINESS_TIMEZONE,
@@ -11,6 +12,7 @@ import {
   YEAR_MIN,
   YEAR_MAX,
 } from './config/constants.js';
+import { isEmailEnabled } from './config/feature-flags.js';
 
 export interface PublicConfigResponse {
   timezone: string;
@@ -27,12 +29,18 @@ export interface PublicConfigResponse {
     min: number;
     max: number;
   };
+  features: {
+    emailEnabled: boolean;
+  };
 }
 
 @ApiTags('config')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly config: ConfigService,
+  ) {}
 
   @Get()
   getHealth(): object {
@@ -60,6 +68,9 @@ export class AppController {
       yearRange: {
         min: YEAR_MIN,
         max: YEAR_MAX,
+      },
+      features: {
+        emailEnabled: isEmailEnabled(this.config),
       },
     };
   }

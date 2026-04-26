@@ -36,3 +36,7 @@ export const MIN_REPORT_DEADLINE_DAY = 1;
 // Rango de anios validos para filtros y queries.
 export const YEAR_MIN = 2000;
 export const YEAR_MAX = 2100;
+
+// Feature flags. Valores por defecto seguros (deshabilitados) cuando la
+// integracion externa requerida aun no esta configurada.
+export const EMAIL_ENABLED_DEFAULT = false;
