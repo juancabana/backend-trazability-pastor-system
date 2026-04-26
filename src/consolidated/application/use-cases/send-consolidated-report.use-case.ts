@@ -19,7 +19,8 @@ export class SendConsolidatedReportUseCase {
   async execute(
     dto: SendConsolidatedReportDto,
   ): Promise<SendConsolidatedReportResponseDto> {
-    const { recipientUserIds, associationId, month, year } = dto;
+    const { recipientUserIds, associationId } = dto;
+    const periodOffset = dto.periodOffset ?? 0;
 
     if (recipientUserIds.length === 0) {
       throw new BadRequestException(
@@ -55,19 +56,17 @@ export class SendConsolidatedReportUseCase {
       return { name: u.name, email: u.email };
     });
 
-    // Obtener el consolidado de la asociación
+    // Obtener el consolidado de la asociación (incluye periodo calculado)
     const consolidated = await this.getConsolidatedByAssociation.execute(
       associationId,
-      month,
-      year,
+      periodOffset,
     );
 
-    // Enviar correos
+    // Enviar correos usando el periodo del consolidado
     await this.emailService.sendConsolidatedReport(
       recipients,
       consolidated,
-      month,
-      year,
+      consolidated.period,
     );
 
     return {

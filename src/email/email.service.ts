@@ -6,23 +6,9 @@ import {
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import type { AssociationConsolidatedResponseDto } from '../consolidated/application/dtos/consolidated.response.dto.js';
+import type { PeriodMeta } from '../common/utils/period.util.js';
 import { COMPLIANCE_THRESHOLD } from '../config/constants.js';
 import { isEmailEnabled } from '../config/feature-flags.js';
-
-const MONTHS_ES = [
-  'Enero',
-  'Febrero',
-  'Marzo',
-  'Abril',
-  'Mayo',
-  'Junio',
-  'Julio',
-  'Agosto',
-  'Septiembre',
-  'Octubre',
-  'Noviembre',
-  'Diciembre',
-];
 
 export interface EmailRecipient {
   name: string;
@@ -53,8 +39,7 @@ export class EmailService {
   async sendConsolidatedReport(
     recipients: EmailRecipient[],
     data: AssociationConsolidatedResponseDto,
-    month: number,
-    year: number,
+    period: PeriodMeta,
   ): Promise<void> {
     if (!this.enabled) {
       throw new ServiceUnavailableException(
@@ -62,8 +47,8 @@ export class EmailService {
       );
     }
 
-    const monthLabel = MONTHS_ES[month - 1] ?? String(month);
-    const subject = `Consolidado Pastoral – ${monthLabel} ${year}`;
+    const periodLabel = period.label;
+    const subject = `Consolidado Pastoral – ${periodLabel}`;
 
     const totalActivities = data.totals?.totalActivities ?? 0;
     const totalHours = data.totals?.totalHours ?? 0;
@@ -111,8 +96,9 @@ export class EmailService {
       .filter(Boolean);
 
     const context = {
-      monthLabel,
-      year,
+      periodLabel,
+      periodStart: period.startDate,
+      periodEnd: period.endDate,
       totalPastors,
       totalActivities,
       totalHours: totalHours.toFixed(1),
@@ -143,7 +129,8 @@ export class EmailService {
 
     await Promise.all(sendPromises);
     this.logger.log(
-      `Reporte consolidado ${monthLabel} ${year} enviado a ${recipients.length} destinatarios`,
+      `Reporte consolidado ${periodLabel} enviado a ${recipients.length} destinatarios`,
     );
   }
 }
+

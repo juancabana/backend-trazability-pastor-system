@@ -1,5 +1,22 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+export class PeriodMetaDto {
+  @ApiProperty({ description: 'Fecha de inicio del periodo (YYYY-MM-DD)' })
+  startDate: string;
+
+  @ApiProperty({ description: 'Fecha de fin del periodo (YYYY-MM-DD)' })
+  endDate: string;
+
+  @ApiProperty({ description: 'Etiqueta legible del periodo' })
+  label: string;
+
+  @ApiProperty({ description: 'Dia de cierre usado para calcular el periodo' })
+  deadlineDay: number;
+
+  @ApiProperty({ description: 'Offset solicitado (0=actual, -1=anterior)' })
+  offset: number;
+}
+
 export interface SubCategoryConsolidated {
   subcategoryId: string;
   subcategoryName: string;
@@ -23,6 +40,9 @@ export interface ConsolidatedTotals {
 }
 
 export class ConsolidatedResponseDto {
+  @ApiProperty({ type: PeriodMetaDto })
+  period: PeriodMetaDto;
+
   @ApiProperty()
   categories: CategoryConsolidated[];
 
@@ -75,6 +95,9 @@ export class PastorSummaryDto {
 }
 
 export class AssociationConsolidatedResponseDto {
+  @ApiProperty({ type: PeriodMetaDto })
+  period: PeriodMetaDto;
+
   @ApiProperty()
   categories: CategoryConsolidated[];
 

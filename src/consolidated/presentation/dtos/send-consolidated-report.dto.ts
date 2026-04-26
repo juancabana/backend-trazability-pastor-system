@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsInt, IsUUID, Max, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SendConsolidatedReportDto {
@@ -16,22 +16,19 @@ export class SendConsolidatedReportDto {
   @IsUUID('4')
   associationId: string;
 
-  @ApiProperty({
-    description: 'Mes del reporte (1-12)',
-    minimum: 1,
+  @ApiPropertyOptional({
+    description:
+      'Offset del periodo respecto al actual (0=actual, -1=anterior, ...). Default: 0.',
+    minimum: -120,
     maximum: 12,
+    default: 0,
   })
+  @IsOptional()
   @IsInt()
-  @Min(1)
+  @Min(-120)
   @Max(12)
   @Type(() => Number)
-  month: number;
-
-  @ApiProperty({ description: 'Año del reporte', minimum: 2020 })
-  @IsInt()
-  @Min(2020)
-  @Type(() => Number)
-  year: number;
+  periodOffset?: number;
 }
 
 export class SendConsolidatedReportResponseDto {
@@ -41,3 +38,4 @@ export class SendConsolidatedReportResponseDto {
   @ApiProperty({ description: 'Emails de los destinatarios', type: [String] })
   recipients: string[];
 }
+

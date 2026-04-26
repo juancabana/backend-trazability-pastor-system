@@ -1,14 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DailyReportRepository } from '../../../daily-report/infrastructure/repositories/daily-report.repository.js';
 import { ActivityCategoryRepository } from '../../../activity-category/infrastructure/repositories/activity-category.repository.js';
 import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
 import { DistrictRepository } from '../../../district/infrastructure/repositories/district.repository.js';
+import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
 import {
   AssociationConsolidatedResponseDto,
   CategoryConsolidated,
   SubCategoryConsolidated,
   PastorSummaryDto,
 } from '../dtos/consolidated.response.dto.js';
+import { buildPeriodMeta } from '../../../common/utils/period.util.js';
+import { countDaysInclusive } from '../helpers/period-helpers.js';
+import { DEFAULT_REPORT_DEADLINE_DAY } from '../../../config/constants.js';
 
 @Injectable()
 export class GetConsolidatedByPastorsUseCase {
@@ -17,15 +21,20 @@ export class GetConsolidatedByPastorsUseCase {
     private readonly categoryRepo: ActivityCategoryRepository,
     private readonly userRepo: UserRepository,
     private readonly districtRepo: DistrictRepository,
+    private readonly associationRepo: AssociationRepository,
   ) {}
 
   async execute(
     pastorIds: string[],
-    month: number,
-    year: number,
+    periodOffset: number,
   ): Promise<AssociationConsolidatedResponseDto> {
     if (pastorIds.length === 0) {
+      const fallback = buildPeriodMeta(
+        DEFAULT_REPORT_DEADLINE_DAY,
+        periodOffset,
+      );
       return {
+        period: fallback,
         categories: [],
         pastorSummaries: [],
         totals: { totalActivities: 0, totalHours: 0 },
@@ -34,8 +43,31 @@ export class GetConsolidatedByPastorsUseCase {
     }
 
     const pastors = await this.userRepo.findByIds(pastorIds);
+    if (pastors.length === 0) {
+      throw new NotFoundException(
+        'Ningún pastor encontrado con los IDs proporcionados',
+      );
+    }
 
-    // Build district name map from the pastors' unique districtIds
+    // Resolvemos el deadlineDay desde la asociación del primer pastor.
+    // Asumimos que los pastores seleccionados pertenecen a la misma
+    // asociación (es la semántica del consolidado personalizado en admin).
+    const firstPastor = pastors[0];
+    if (!firstPastor.associationId) {
+      throw new BadRequestException(
+        `El pastor ${firstPastor.id} no pertenece a ninguna asociación`,
+      );
+    }
+    const association = await this.associationRepo.findById(
+      firstPastor.associationId,
+    );
+    if (!association) {
+      throw new NotFoundException(
+        `Asociación ${firstPastor.associationId} no encontrada`,
+      );
+    }
+    const period = buildPeriodMeta(association.reportDeadlineDay, periodOffset);
+
     const districtIds = [
       ...new Set(
         pastors.map((p) => p.districtId).filter((id): id is string => !!id),
@@ -50,14 +82,13 @@ export class GetConsolidatedByPastorsUseCase {
         .map((d) => [d.id, d.name]),
     );
 
-    const reports = await this.reportRepo.findByAssociationPastors(
+    const reports = await this.reportRepo.findByPastorsAndDateRange(
       pastors.map((p) => p.id),
-      year,
-      month,
+      period.startDate,
+      period.endDate,
     );
     const categories = await this.categoryRepo.findAll();
 
-    // Build subcategory accumulators keyed by categoryId -> subcategoryId
     const subAccum: Record<
       string,
       Record<
@@ -79,7 +110,6 @@ export class GetConsolidatedByPastorsUseCase {
       }
     }
 
-    // Build per-pastor stats
     const pastorStats: Record<
       string,
       {
@@ -133,7 +163,7 @@ export class GetConsolidatedByPastorsUseCase {
       }
     }
 
-    const daysInMonth = new Date(year, month, 0).getDate();
+    const daysInPeriod = countDaysInclusive(period.startDate, period.endDate);
 
     const consolidatedCategories: CategoryConsolidated[] = categories.map(
       (cat) => {
@@ -174,13 +204,14 @@ export class GetConsolidatedByPastorsUseCase {
         totalHours: Math.round(stats.totalHours * 10) / 10,
         totalTransportAmount: stats.totalTransportAmount,
         compliance:
-          daysInMonth > 0
-            ? Math.round((stats.days.size / daysInMonth) * 100) / 100
+          daysInPeriod > 0
+            ? Math.round((stats.days.size / daysInPeriod) * 100) / 100
             : 0,
       };
     });
 
     return {
+      period,
       categories: consolidatedCategories,
       pastorSummaries,
       totals: {

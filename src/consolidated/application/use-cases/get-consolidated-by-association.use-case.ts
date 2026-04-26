@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DailyReportRepository } from '../../../daily-report/infrastructure/repositories/daily-report.repository.js';
 import { ActivityCategoryRepository } from '../../../activity-category/infrastructure/repositories/activity-category.repository.js';
 import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
 import { DistrictRepository } from '../../../district/infrastructure/repositories/district.repository.js';
+import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
 import { UserRole } from '../../../common/enums/user-role.enum.js';
 import {
   AssociationConsolidatedResponseDto,
@@ -10,6 +11,8 @@ import {
   SubCategoryConsolidated,
   PastorSummaryDto,
 } from '../dtos/consolidated.response.dto.js';
+import { buildPeriodMeta } from '../../../common/utils/period.util.js';
+import { countDaysInclusive } from '../helpers/period-helpers.js';
 
 @Injectable()
 export class GetConsolidatedByAssociationUseCase {
@@ -18,13 +21,19 @@ export class GetConsolidatedByAssociationUseCase {
     private readonly categoryRepo: ActivityCategoryRepository,
     private readonly userRepo: UserRepository,
     private readonly districtRepo: DistrictRepository,
+    private readonly associationRepo: AssociationRepository,
   ) {}
 
   async execute(
     associationId: string,
-    month: number,
-    year: number,
+    periodOffset: number,
   ): Promise<AssociationConsolidatedResponseDto> {
+    const association = await this.associationRepo.findById(associationId);
+    if (!association) {
+      throw new NotFoundException(`Asociación ${associationId} no encontrada`);
+    }
+    const period = buildPeriodMeta(association.reportDeadlineDay, periodOffset);
+
     const pastors = (
       await this.userRepo.findByAssociation(associationId)
     ).filter((u) => u.role === UserRole.PASTOR);
@@ -32,14 +41,13 @@ export class GetConsolidatedByAssociationUseCase {
     const districts = await this.districtRepo.findByAssociation(associationId);
     const districtMap = new Map(districts.map((d) => [d.id, d.name]));
 
-    const reports = await this.reportRepo.findByAssociationPastors(
+    const reports = await this.reportRepo.findByPastorsAndDateRange(
       pastorIds,
-      year,
-      month,
+      period.startDate,
+      period.endDate,
     );
     const categories = await this.categoryRepo.findAll();
 
-    // Build subcategory accumulators
     const subAccum: Record<
       string,
       Record<
@@ -61,7 +69,6 @@ export class GetConsolidatedByAssociationUseCase {
       }
     }
 
-    // Build per-pastor stats
     const pastorStats: Record<
       string,
       {
@@ -115,9 +122,8 @@ export class GetConsolidatedByAssociationUseCase {
       }
     }
 
-    const daysInMonth = new Date(year, month, 0).getDate();
+    const daysInPeriod = countDaysInclusive(period.startDate, period.endDate);
 
-    // Build categories array with subcategories as arrays
     const consolidatedCategories: CategoryConsolidated[] = categories.map(
       (cat) => {
         const subs = subAccum[cat.id];
@@ -157,13 +163,14 @@ export class GetConsolidatedByAssociationUseCase {
         totalHours: Math.round(stats.totalHours * 10) / 10,
         totalTransportAmount: stats.totalTransportAmount,
         compliance:
-          daysInMonth > 0
-            ? Math.round((stats.days.size / daysInMonth) * 100) / 100
+          daysInPeriod > 0
+            ? Math.round((stats.days.size / daysInPeriod) * 100) / 100
             : 0,
       };
     });
 
     return {
+      period,
       categories: consolidatedCategories,
       pastorSummaries,
       totals: {

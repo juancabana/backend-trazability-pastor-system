@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
 import { GetConsolidatedByAssociationUseCase } from './get-consolidated-by-association.use-case.js';
+import {
+  buildPeriodMeta,
+  type PeriodMeta,
+} from '../../../common/utils/period.util.js';
+import { DEFAULT_REPORT_DEADLINE_DAY } from '../../../config/constants.js';
 
 export interface AssociationSummary {
   associationId: string;
@@ -9,9 +14,13 @@ export interface AssociationSummary {
   totalActivities: number;
   totalHours: number;
   avgCompliance: number;
+  /** Periodo concreto evaluado para esta asociación (puede variar entre asociaciones si tienen distinto deadlineDay). */
+  period: PeriodMeta;
 }
 
 export interface UnionConsolidatedResponseDto {
+  /** Periodo representativo a nivel union (corresponde al deadlineDay por defecto del sistema). */
+  period: PeriodMeta;
   associationSummaries: AssociationSummary[];
   totalAssociations: number;
   totalPastors: number;
@@ -29,8 +38,7 @@ export class GetConsolidatedByUnionUseCase {
 
   async execute(
     unionId: string,
-    month: number,
-    year: number,
+    periodOffset: number,
   ): Promise<UnionConsolidatedResponseDto> {
     const associations = await this.associationRepo.findByUnion(unionId);
 
@@ -44,8 +52,7 @@ export class GetConsolidatedByUnionUseCase {
     for (const assoc of associations) {
       const consolidated = await this.getByAssociation.execute(
         assoc.id,
-        month,
-        year,
+        periodOffset,
       );
 
       const pastorCount = consolidated.pastorSummaries.length;
@@ -62,6 +69,7 @@ export class GetConsolidatedByUnionUseCase {
         totalActivities: consolidated.totals.totalActivities,
         totalHours: consolidated.totals.totalHours,
         avgCompliance: Math.round(avgCompliance * 100) / 100,
+        period: consolidated.period,
       });
 
       totalPastors += pastorCount;
@@ -73,7 +81,14 @@ export class GetConsolidatedByUnionUseCase {
       }
     }
 
+    // Periodo representativo: el de la primera asociación, o el del default
+    // del sistema si la union no tiene asociaciones.
+    const representativePeriod =
+      summaries[0]?.period ??
+      buildPeriodMeta(DEFAULT_REPORT_DEADLINE_DAY, periodOffset);
+
     return {
+      period: representativePeriod,
       associationSummaries: summaries,
       totalAssociations: associations.length,
       totalPastors,

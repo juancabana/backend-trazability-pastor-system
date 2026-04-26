@@ -32,7 +32,7 @@ import {
   ConsolidatedResponseDto,
   AssociationConsolidatedResponseDto,
 } from '../application/dtos/consolidated.response.dto.js';
-import { validateMonthYear } from '../../common/utils/date-range.util.js';
+import { parsePeriodOffset } from '../../common/utils/period.util.js';
 import { SendConsolidatedReportUseCase } from '../application/use-cases/send-consolidated-report.use-case.js';
 import {
   SendConsolidatedReportDto,
@@ -53,17 +53,23 @@ export class ConsolidatedController {
   @Get('pastor/:pastorId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Consolidado por pastor (mes/ano)' })
-  @ApiQuery({ name: 'month', required: true, type: Number })
-  @ApiQuery({ name: 'year', required: true, type: Number })
+  @ApiOperation({
+    summary:
+      'Consolidado por pastor para un periodo (offset relativo al actual).',
+  })
+  @ApiQuery({
+    name: 'periodOffset',
+    required: false,
+    type: Number,
+    description: '0=actual, -1=anterior, +1=siguiente. Default: 0.',
+  })
   @ApiResponse({ status: 200, type: ConsolidatedResponseDto })
   getByPastor(
     @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
-    @Query('month') month: string,
-    @Query('year') year: string,
+    @Query('periodOffset') periodOffset?: string,
   ): Promise<ConsolidatedResponseDto> {
-    const { m, y } = validateMonthYear(month, year);
-    return this.getByPastorUseCase.execute(pastorId, m, y);
+    const offset = parsePeriodOffset(periodOffset);
+    return this.getByPastorUseCase.execute(pastorId, offset);
   }
 
   @Get('association/:associationId')
@@ -71,18 +77,17 @@ export class ConsolidatedController {
   @Roles(UserRole.ADMIN_READONLY)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Consolidado por asociacion (admin/readonly, mes/ano)',
+    summary:
+      'Consolidado por asociacion para un periodo (admin/readonly).',
   })
-  @ApiQuery({ name: 'month', required: true, type: Number })
-  @ApiQuery({ name: 'year', required: true, type: Number })
+  @ApiQuery({ name: 'periodOffset', required: false, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
   getByAssociation(
     @Param('associationId', new ParseUUIDPipe()) associationId: string,
-    @Query('month') month: string,
-    @Query('year') year: string,
+    @Query('periodOffset') periodOffset?: string,
   ): Promise<AssociationConsolidatedResponseDto> {
-    const { m, y } = validateMonthYear(month, year);
-    return this.getByAssociationUseCase.execute(associationId, m, y);
+    const offset = parsePeriodOffset(periodOffset);
+    return this.getByAssociationUseCase.execute(associationId, offset);
   }
 
   @Get('custom')
@@ -91,43 +96,41 @@ export class ConsolidatedController {
   @ApiBearerAuth()
   @ApiOperation({
     summary:
-      'Consolidado personalizado por pastores seleccionados (admin/readonly, mes/ano)',
+      'Consolidado personalizado por pastores seleccionados para un periodo.',
   })
   @ApiQuery({
     name: 'pastorIds',
     required: true,
     description: 'UUIDs de pastores separados por coma',
   })
-  @ApiQuery({ name: 'month', required: true, type: Number })
-  @ApiQuery({ name: 'year', required: true, type: Number })
+  @ApiQuery({ name: 'periodOffset', required: false, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
   getByPastors(
     @Query('pastorIds') pastorIds: string,
-    @Query('month') month: string,
-    @Query('year') year: string,
+    @Query('periodOffset') periodOffset?: string,
   ): Promise<AssociationConsolidatedResponseDto> {
     const ids = (pastorIds ?? '')
       .split(',')
       .map((id) => id.trim())
       .filter(Boolean);
-    const { m, y } = validateMonthYear(month, year);
-    return this.getByPastorsUseCase.execute(ids, m, y);
+    const offset = parsePeriodOffset(periodOffset);
+    return this.getByPastorsUseCase.execute(ids, offset);
   }
 
   @Get('union/:unionId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Consolidado por union (super_admin, mes/ano)' })
-  @ApiQuery({ name: 'month', required: true, type: Number })
-  @ApiQuery({ name: 'year', required: true, type: Number })
+  @ApiOperation({
+    summary: 'Consolidado por union para un periodo (super_admin).',
+  })
+  @ApiQuery({ name: 'periodOffset', required: false, type: Number })
   getByUnion(
     @Param('unionId', new ParseUUIDPipe()) unionId: string,
-    @Query('month') month: string,
-    @Query('year') year: string,
+    @Query('periodOffset') periodOffset?: string,
   ): Promise<UnionConsolidatedResponseDto> {
-    const { m, y } = validateMonthYear(month, year);
-    return this.getByUnionUseCase.execute(unionId, m, y);
+    const offset = parsePeriodOffset(periodOffset);
+    return this.getByUnionUseCase.execute(unionId, offset);
   }
 
   @Post('send-report')
@@ -149,3 +152,4 @@ export class ConsolidatedController {
     return this.sendReportUseCase.execute(dto);
   }
 }
+

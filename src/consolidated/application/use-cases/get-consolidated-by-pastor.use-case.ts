@@ -1,32 +1,60 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DailyReportRepository } from '../../../daily-report/infrastructure/repositories/daily-report.repository.js';
 import { ActivityCategoryRepository } from '../../../activity-category/infrastructure/repositories/activity-category.repository.js';
+import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
+import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
 import {
   ConsolidatedResponseDto,
   CategoryConsolidated,
   SubCategoryConsolidated,
 } from '../dtos/consolidated.response.dto.js';
+import { buildPeriodMeta } from '../../../common/utils/period.util.js';
+import { countDaysInclusive } from '../helpers/period-helpers.js';
 
 @Injectable()
 export class GetConsolidatedByPastorUseCase {
   constructor(
     private readonly reportRepo: DailyReportRepository,
     private readonly categoryRepo: ActivityCategoryRepository,
+    private readonly userRepo: UserRepository,
+    private readonly associationRepo: AssociationRepository,
   ) {}
 
   async execute(
     pastorId: string,
-    month: number,
-    year: number,
+    periodOffset: number,
   ): Promise<ConsolidatedResponseDto> {
-    const reports = await this.reportRepo.findByPastorAndMonth(
+    const pastor = await this.userRepo.findById(pastorId);
+    if (!pastor) {
+      throw new NotFoundException(`Pastor ${pastorId} no encontrado`);
+    }
+    if (!pastor.associationId) {
+      throw new BadRequestException(
+        `El pastor ${pastorId} no pertenece a ninguna asociación`,
+      );
+    }
+    const association = await this.associationRepo.findById(
+      pastor.associationId,
+    );
+    if (!association) {
+      throw new NotFoundException(
+        `Asociación ${pastor.associationId} no encontrada`,
+      );
+    }
+
+    const period = buildPeriodMeta(association.reportDeadlineDay, periodOffset);
+
+    const reports = await this.reportRepo.findByPastorAndDateRange(
       pastorId,
-      year,
-      month,
+      period.startDate,
+      period.endDate,
     );
     const categories = await this.categoryRepo.findAll();
 
-    // Build subcategory accumulators keyed by categoryId -> subcategoryId
     const subAccum: Record<
       string,
       Record<
@@ -71,9 +99,8 @@ export class GetConsolidatedByPastorUseCase {
       }
     }
 
-    const daysInMonth = new Date(year, month, 0).getDate();
+    const daysInPeriod = countDaysInclusive(period.startDate, period.endDate);
 
-    // Build categories array with subcategories as arrays
     const consolidatedCategories: CategoryConsolidated[] = categories.map(
       (cat) => {
         const subs = subAccum[cat.id];
@@ -102,17 +129,18 @@ export class GetConsolidatedByPastorUseCase {
     );
 
     return {
+      period,
       categories: consolidatedCategories,
       totals: {
         totalActivities,
         totalHours: Math.round(totalHours * 10) / 10,
       },
       compliance:
-        daysInMonth > 0
-          ? Math.round((daysWithReports.size / daysInMonth) * 100) / 100
+        daysInPeriod > 0
+          ? Math.round((daysWithReports.size / daysInPeriod) * 100) / 100
           : 0,
       totalReports: reports.length,
-      daysInPeriod: daysInMonth,
+      daysInPeriod,
       daysWithReports: daysWithReports.size,
       totalTransportAmount,
     };
