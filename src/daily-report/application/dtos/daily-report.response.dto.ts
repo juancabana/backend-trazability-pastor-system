@@ -30,4 +30,11 @@ export class DailyReportResponseDto {
   @ApiProperty()
   @Expose()
   updatedAt: Date;
+
+  @ApiProperty({
+    description:
+      'Indica si el reporte es editable por el pastor en el periodo actual (calculado server-side en zona Bogota).',
+  })
+  @Expose()
+  isEditable: boolean;
 }

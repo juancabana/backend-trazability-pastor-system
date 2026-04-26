@@ -29,7 +29,9 @@ export class LoginUseCase {
 
     // Resolve association and union names in parallel
     const [association, union] = await Promise.all([
-      user.associationId ? this.associationRepo.findById(user.associationId) : null,
+      user.associationId
+        ? this.associationRepo.findById(user.associationId)
+        : null,
       user.unionId ? this.unionRepo.findById(user.unionId) : null,
     ]);
     const associationName = association?.name;
@@ -61,6 +63,7 @@ export class LoginUseCase {
       reportDeadlineDay,
       position: user.position ?? undefined,
       mustChangePassword: user.mustChangePassword,
+      canEditAllReports: user.canEditAllReports,
     };
   }
 }

@@ -38,6 +38,14 @@ export class UserResponseDto {
   @Expose()
   phone: string | null;
 
+  @ApiPropertyOptional({
+    example: false,
+    description:
+      'Permite al pastor editar informes de cualquier periodo vencido',
+  })
+  @Expose()
+  canEditAllReports: boolean;
+
   @ApiProperty()
   @Expose()
   createdAt: Date;
@@ -52,6 +60,7 @@ export class UserResponseDto {
     unionId: string | null;
     position: string | null;
     phone: string | null;
+    canEditAllReports: boolean;
     createdAt: Date;
   }): UserResponseDto {
     return {
@@ -64,6 +73,7 @@ export class UserResponseDto {
       unionId: u.unionId,
       position: u.position,
       phone: u.phone,
+      canEditAllReports: u.canEditAllReports,
       createdAt: u.createdAt,
     };
   }

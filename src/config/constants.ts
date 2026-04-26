@@ -15,3 +15,28 @@ export const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.ADMIN]: 2,
   [UserRole.SUPER_ADMIN]: 3,
 };
+
+// ===== Reglas de negocio =====
+// Zona horaria oficial del sistema. Toda logica de fechas usa esta zona.
+export const BUSINESS_TIMEZONE = 'America/Bogota';
+
+// Umbrales de cumplimiento (decimales 0-1).
+// >= COMPLIANCE_THRESHOLD: verde
+// >= COMPLIANCE_AMBER_THRESHOLD y < COMPLIANCE_THRESHOLD: ambar
+// < COMPLIANCE_AMBER_THRESHOLD: rojo
+export const COMPLIANCE_THRESHOLD = 0.7;
+export const COMPLIANCE_AMBER_THRESHOLD = 0.4;
+
+// Dia limite de reporte por defecto y maximo permitido.
+// Maximo 28 para evitar problemas con febrero.
+export const DEFAULT_REPORT_DEADLINE_DAY = 20;
+export const MAX_REPORT_DEADLINE_DAY = 28;
+export const MIN_REPORT_DEADLINE_DAY = 1;
+
+// Rango de anios validos para filtros y queries.
+export const YEAR_MIN = 2000;
+export const YEAR_MAX = 2100;
+
+// Feature flags. Valores por defecto seguros (deshabilitados) cuando la
+// integracion externa requerida aun no esta configurada.
+export const EMAIL_ENABLED_DEFAULT = false;

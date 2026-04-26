@@ -6,15 +6,18 @@ import {
 import { DataSource } from 'typeorm';
 import { DailyReportEntity } from '../../domain/entities/daily-report.entity.js';
 import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
+import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
 import { CreateDailyReportDto } from '../dtos/create-daily-report.dto.js';
 import { DailyReportResponseDto } from '../dtos/daily-report.response.dto.js';
 import { isDateEditable } from '../../../common/utils/period.util.js';
+import { parseBogotaDate } from '../../../common/utils/bogota-time.util.js';
 
 @Injectable()
 export class CreateOrUpdateReportUseCase {
   constructor(
     private readonly dataSource: DataSource,
     private readonly associationRepo: AssociationRepository,
+    private readonly userRepo: UserRepository,
   ) {}
 
   async execute(
@@ -27,11 +30,14 @@ export class CreateOrUpdateReportUseCase {
       throw new BadRequestException('Asociacion no encontrada');
     }
 
-    const reportDate = new Date(dto.date + 'T00:00:00');
+    const reportDate = parseBogotaDate(dto.date);
     if (!isDateEditable(reportDate, association.reportDeadlineDay)) {
-      throw new ForbiddenException(
-        'No se puede editar un reporte fuera del periodo actual',
-      );
+      const pastor = await this.userRepo.findById(pastorId);
+      if (!pastor?.canEditAllReports) {
+        throw new ForbiddenException(
+          'No se puede editar un reporte fuera del periodo actual',
+        );
+      }
     }
 
     const report = await this.dataSource.transaction(async (manager) => {
@@ -66,6 +72,10 @@ export class CreateOrUpdateReportUseCase {
       observations: report!.observations,
       createdAt: report!.createdAt,
       updatedAt: report!.updatedAt,
+      isEditable: isDateEditable(
+        parseBogotaDate(report!.date),
+        association.reportDeadlineDay,
+      ),
     };
   }
 }

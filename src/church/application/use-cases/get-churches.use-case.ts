@@ -10,13 +10,17 @@ export class GetChurchesUseCase {
     private readonly districtRepo: DistrictRepository,
   ) {}
 
-  async execute(districtId?: string, associationId?: string): Promise<ChurchResponseDto[]> {
+  async execute(
+    districtId?: string,
+    associationId?: string,
+  ): Promise<ChurchResponseDto[]> {
     let churches;
 
     if (districtId) {
       churches = await this.churchRepo.findByDistrict(districtId);
     } else if (associationId) {
-      const districts = await this.districtRepo.findByAssociation(associationId);
+      const districts =
+        await this.districtRepo.findByAssociation(associationId);
       const districtIds = districts.map((d) => d.id);
       churches = await this.churchRepo.findByDistricts(districtIds);
     } else {

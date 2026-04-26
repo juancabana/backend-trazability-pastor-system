@@ -25,6 +25,9 @@ export class UpdateUserUseCase {
       updates.passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
       updates.mustChangePassword = true;
     }
+    if (dto.canEditAllReports !== undefined) {
+      updates.canEditAllReports = dto.canEditAllReports;
+    }
 
     const updated = await this.userRepo.update(id, updates);
     if (!updated) {

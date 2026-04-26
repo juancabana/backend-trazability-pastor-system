@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { YEAR_MIN, YEAR_MAX } from '../../config/constants.js';
 
 export function parseMonth(month: string): number {
   const m = parseInt(month);
@@ -10,7 +11,7 @@ export function parseMonth(month: string): number {
 
 export function parseYear(year: string): number {
   const y = parseInt(year);
-  if (isNaN(y) || y < 2000 || y > 2100) {
+  if (isNaN(y) || y < YEAR_MIN || y > YEAR_MAX) {
     throw new BadRequestException('year debe ser un numero valido');
   }
   return y;

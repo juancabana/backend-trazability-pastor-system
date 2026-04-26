@@ -1,9 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn } from 'typeorm';
 import { UserRole } from '../../../common/enums/user-role.enum.js';
 
 @Entity('users')
@@ -40,6 +35,9 @@ export class UserEntity {
 
   @Column({ type: 'boolean', default: true })
   mustChangePassword: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  canEditAllReports: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consolidado Pastoral – {{periodLabel}}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
+    .wrapper { max-width: 680px; margin: 0 auto; background: #ffffff; }
+
+    /* Header */
+    .header { background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%); padding: 36px 40px; }
+    .header-title { color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-sub { color: #99f6e4; font-size: 13px; margin-top: 4px; }
+    .header-period { display: inline-block; margin-top: 14px; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 14px; color: #ffffff; font-size: 14px; font-weight: 600; }
+
+    /* Greeting */
+    .greeting { padding: 28px 40px 0; }
+    .greeting p { font-size: 15px; color: #334155; line-height: 1.6; }
+
+    /* Stats row */
+    .stats { display: flex; gap: 12px; padding: 24px 40px; }
+    .stat-card { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-value { font-size: 24px; font-weight: 700; color: #0f766e; }
+    .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+    /* Section title */
+    .section-title { padding: 8px 40px 12px; font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 1px solid #f1f5f9; }
+
+    /* Pastor table */
+    .table-wrap { padding: 0 40px 24px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #f8fafc; }
+    th { padding: 10px 12px; text-align: left; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    .pastor-name { font-weight: 600; color: #1e293b; }
+    .position-badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 4px; background: #f0fdf4; color: #16a34a; }
+    .compliance-ok { display: inline-block; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; background: #dcfce7; color: #15803d; }
+    .compliance-warn { display: inline-block; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; background: #fef3c7; color: #92400e; }
+    .total-row td { font-weight: 700; background: #f8fafc; border-top: 2px solid #e2e8f0; color: #0f766e; }
+
+    /* Categories */
+    .categories-wrap { padding: 0 40px 24px; }
+    .cat-block { margin-bottom: 16px; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+    .cat-header { padding: 10px 16px; display: flex; align-items: center; gap: 8px; background: #f8fafc; }
+    .cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .cat-name { font-weight: 700; font-size: 13px; color: #1e293b; }
+    .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .cat-table th { padding: 7px 14px; text-align: left; font-weight: 600; color: #94a3b8; font-size: 11px; background: #ffffff; border-bottom: 1px solid #f1f5f9; }
+    .cat-table td { padding: 8px 14px; border-bottom: 1px solid #f8fafc; color: #475569; }
+    .cat-table tr:last-child td { border-bottom: none; }
+    .qty-val { font-weight: 600; color: #1e293b; }
+
+    /* Footer */
+    .footer { padding: 28px 40px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center; }
+    .footer p { font-size: 12px; color: #94a3b8; line-height: 1.7; }
+    .footer strong { color: #64748b; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-title">Sistema de Trazabilidad Pastoral</div>
+      <div class="header-sub">Reporte consolidado generado automáticamente</div>
+      <div class="header-period">{{periodLabel}}</div>
+    </div>
+
+    <!-- Greeting -->
+    <div class="greeting">
+      <p>Estimado/a <strong>{{recipientName}}</strong>,</p>
+      <p style="margin-top:8px;">A continuación encontrará el resumen consolidado de actividades pastorales correspondiente al periodo del <strong>{{periodLabel}}</strong>.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value">{{totalPastors}}</div>
+        <div class="stat-label">Pastores</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{totalActivities}}</div>
+        <div class="stat-label">Actividades</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{totalHours}}h</div>
+        <div class="stat-label">Horas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{avgCompliance}}%</div>
+        <div class="stat-label">Cumplimiento</div>
+      </div>
+    </div>
+
+    <!-- Pastor summaries -->
+    <div class="section-title">Resumen por Pastor</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pastor</th>
+            <th>Distrito</th>
+            <th style="text-align:right;">Actividades</th>
+            <th style="text-align:right;">Horas</th>
+            <th style="text-align:right;">Cumplimiento</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each pastorRows}}
+          <tr>
+            <td>
+              <span class="pastor-name">{{this.name}}</span>
+              {{#if this.position}}<span class="position-badge">{{this.position}}</span>{{/if}}
+            </td>
+            <td style="color:#64748b;">{{this.district}}</td>
+            <td style="text-align:right;font-weight:600;">{{this.activities}}</td>
+            <td style="text-align:right;color:#64748b;">{{this.hours}}h</td>
+            <td style="text-align:right;">
+              {{#if this.complianceOk}}
+                <span class="compliance-ok">{{this.compliance}}%</span>
+              {{else}}
+                <span class="compliance-warn">{{this.compliance}}%</span>
+              {{/if}}
+            </td>
+          </tr>
+          {{/each}}
+          <tr class="total-row">
+            <td colspan="2">Total</td>
+            <td style="text-align:right;">{{totalActivities}}</td>
+            <td style="text-align:right;">{{totalHours}}h</td>
+            <td style="text-align:right;">{{avgCompliance}}%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Categories -->
+    {{#if categoryRows.length}}
+    <div class="section-title">Desglose por Categoría</div>
+    <div class="categories-wrap">
+      {{#each categoryRows}}
+      <div class="cat-block">
+        <div class="cat-header">
+          <div class="cat-dot" style="background-color:{{this.color}};"></div>
+          <span class="cat-name">{{this.name}}</span>
+        </div>
+        <table class="cat-table">
+          <thead>
+            <tr>
+              <th>Subcategoría</th>
+              <th style="text-align:right;">Cantidad</th>
+              <th style="text-align:right;">Horas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each this.subcategories}}
+            <tr>
+              <td>{{this.name}} <span style="color:#94a3b8;font-size:11px;">({{this.unit}})</span></td>
+              <td style="text-align:right;" class="qty-val">{{this.quantity}}</td>
+              <td style="text-align:right;color:#94a3b8;">{{#if this.hours}}{{this.hours}}h{{else}}—{{/if}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{/each}}
+    </div>
+    {{/if}}
+
+    <!-- Footer -->
+    <div class="footer">
+      <p><strong>Sistema de Trazabilidad Pastoral</strong></p>
+      <p>Este correo fue generado automáticamente el {{generatedAt}}.</p>
+      <p>Por favor no responda a este mensaje.</p>
+    </div>
+
+  </div>
+</body>
+</html>

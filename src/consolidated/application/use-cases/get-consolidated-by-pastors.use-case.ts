@@ -1,10 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DailyReportRepository } from '../../../daily-report/infrastructure/repositories/daily-report.repository.js';
 import { ActivityCategoryRepository } from '../../../activity-category/infrastructure/repositories/activity-category.repository.js';
 import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
 import { DistrictRepository } from '../../../district/infrastructure/repositories/district.repository.js';
 import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
-import { UserRole } from '../../../common/enums/user-role.enum.js';
 import {
   AssociationConsolidatedResponseDto,
   CategoryConsolidated,
@@ -13,9 +12,10 @@ import {
 } from '../dtos/consolidated.response.dto.js';
 import { buildPeriodMeta } from '../../../common/utils/period.util.js';
 import { countDaysInclusive } from '../helpers/period-helpers.js';
+import { DEFAULT_REPORT_DEADLINE_DAY } from '../../../config/constants.js';
 
 @Injectable()
-export class GetConsolidatedByAssociationUseCase {
+export class GetConsolidatedByPastorsUseCase {
   constructor(
     private readonly reportRepo: DailyReportRepository,
     private readonly categoryRepo: ActivityCategoryRepository,
@@ -25,24 +25,65 @@ export class GetConsolidatedByAssociationUseCase {
   ) {}
 
   async execute(
-    associationId: string,
+    pastorIds: string[],
     periodOffset: number,
   ): Promise<AssociationConsolidatedResponseDto> {
-    const association = await this.associationRepo.findById(associationId);
+    if (pastorIds.length === 0) {
+      const fallback = buildPeriodMeta(
+        DEFAULT_REPORT_DEADLINE_DAY,
+        periodOffset,
+      );
+      return {
+        period: fallback,
+        categories: [],
+        pastorSummaries: [],
+        totals: { totalActivities: 0, totalHours: 0 },
+        totalTransportAmount: 0,
+      };
+    }
+
+    const pastors = await this.userRepo.findByIds(pastorIds);
+    if (pastors.length === 0) {
+      throw new NotFoundException(
+        'Ningún pastor encontrado con los IDs proporcionados',
+      );
+    }
+
+    // Resolvemos el deadlineDay desde la asociación del primer pastor.
+    // Asumimos que los pastores seleccionados pertenecen a la misma
+    // asociación (es la semántica del consolidado personalizado en admin).
+    const firstPastor = pastors[0];
+    if (!firstPastor.associationId) {
+      throw new BadRequestException(
+        `El pastor ${firstPastor.id} no pertenece a ninguna asociación`,
+      );
+    }
+    const association = await this.associationRepo.findById(
+      firstPastor.associationId,
+    );
     if (!association) {
-      throw new NotFoundException(`Asociación ${associationId} no encontrada`);
+      throw new NotFoundException(
+        `Asociación ${firstPastor.associationId} no encontrada`,
+      );
     }
     const period = buildPeriodMeta(association.reportDeadlineDay, periodOffset);
 
-    const pastors = (
-      await this.userRepo.findByAssociation(associationId)
-    ).filter((u) => u.role === UserRole.PASTOR);
-    const pastorIds = pastors.map((p) => p.id);
-    const districts = await this.districtRepo.findByAssociation(associationId);
-    const districtMap = new Map(districts.map((d) => [d.id, d.name]));
+    const districtIds = [
+      ...new Set(
+        pastors.map((p) => p.districtId).filter((id): id is string => !!id),
+      ),
+    ];
+    const districtEntries = await Promise.all(
+      districtIds.map((id) => this.districtRepo.findById(id)),
+    );
+    const districtMap = new Map(
+      districtEntries
+        .filter((d): d is NonNullable<typeof d> => !!d)
+        .map((d) => [d.id, d.name]),
+    );
 
     const reports = await this.reportRepo.findByPastorsAndDateRange(
-      pastorIds,
+      pastors.map((p) => p.id),
       period.startDate,
       period.endDate,
     );

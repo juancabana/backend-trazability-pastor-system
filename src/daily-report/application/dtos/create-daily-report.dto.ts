@@ -9,9 +9,12 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { ActivityEntryDto } from './activity-entry.dto.js';
+import { formatBogotaDate } from '../../../common/utils/bogota-time.util.js';
+
+const EXAMPLE_DATE = formatBogotaDate();
 
 export class CreateDailyReportDto {
-  @ApiProperty({ example: '2026-03-05' })
+  @ApiProperty({ example: EXAMPLE_DATE })
   @IsDateString()
   @IsNotEmpty()
   date: string;
@@ -22,7 +25,9 @@ export class CreateDailyReportDto {
   @Type(() => ActivityEntryDto)
   activities: ActivityEntryDto[];
 
-  @ApiPropertyOptional({ example: 'Preparar materiales para la proxima sesion.' })
+  @ApiPropertyOptional({
+    example: 'Preparar materiales para la proxima sesion.',
+  })
   @IsOptional()
   @IsString()
   observations?: string;

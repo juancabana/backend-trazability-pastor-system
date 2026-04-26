@@ -94,7 +94,10 @@ export class DailyReportController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar reporte diario (pastor, periodo actual)' })
   @ApiResponse({ status: 200 })
-  delete(@Param('id', new ParseUUIDPipe()) id: string, @Request() req: { user: JwtPayload }): Promise<void> {
+  delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Request() req: { user: JwtPayload },
+  ): Promise<void> {
     return this.deleteReportUseCase.execute(
       id,
       req.user.sub,

@@ -10,7 +10,8 @@ export class UpdateChurchUseCase {
   async execute(id: string, dto: UpdateChurchDto): Promise<ChurchResponseDto> {
     const updates: Record<string, unknown> = {};
     if (dto.name) updates.name = dto.name.trim();
-    if (dto.address !== undefined) updates.address = dto.address?.trim() ?? null;
+    if (dto.address !== undefined)
+      updates.address = dto.address?.trim() ?? null;
 
     const church = await this.churchRepo.update(id, updates);
     if (!church) {

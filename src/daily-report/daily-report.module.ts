@@ -8,11 +8,13 @@ import { GetReportByPastorAndDateUseCase } from './application/use-cases/get-rep
 import { DeleteReportUseCase } from './application/use-cases/delete-report.use-case.js';
 import { DailyReportController } from './presentation/daily-report.controller.js';
 import { AssociationModule } from '../association/association.module.js';
+import { AuthModule } from '../auth/auth.module.js';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DailyReportEntity]),
     AssociationModule,
+    AuthModule,
   ],
   controllers: [DailyReportController],
   providers: [

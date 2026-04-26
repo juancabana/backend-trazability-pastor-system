@@ -10,8 +10,10 @@ export abstract class BaseRepository<T extends { id: string }> {
   async create(data: Partial<T>): Promise<T> {
     // TypeORM's create() overloads require DeepPartial<T>; the cast is safe here
     // because our entities always match DeepPartial at runtime.
-    const entity = this.repo.create(data as Parameters<typeof this.repo.create>[0]);
-    return this.repo.save(entity) as Promise<T>;
+    const entity = this.repo.create(
+      data as Parameters<typeof this.repo.create>[0],
+    );
+    return this.repo.save(entity);
   }
 
   async update(id: string, data: Partial<T>): Promise<T | null> {
