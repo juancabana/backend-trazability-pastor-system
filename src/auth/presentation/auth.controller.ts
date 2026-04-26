@@ -31,6 +31,7 @@ import {
 import { UserRole } from '../../common/enums/user-role.enum.js';
 import type { JwtPayload } from '../infrastructure/strategies/jwt.strategy.js';
 import { LoginUseCase } from '../application/use-cases/login.use-case.js';
+import { GetMeUseCase } from '../application/use-cases/get-me.use-case.js';
 import { GetUsersUseCase } from '../application/use-cases/get-users.use-case.js';
 import { CreateUserUseCase } from '../application/use-cases/create-user.use-case.js';
 import { UpdateUserUseCase } from '../application/use-cases/update-user.use-case.js';
@@ -38,6 +39,7 @@ import { DeleteUserUseCase } from '../application/use-cases/delete-user.use-case
 import { ChangeOwnPasswordUseCase } from '../application/use-cases/change-own-password.use-case.js';
 import { LoginDto } from '../application/dtos/login.dto.js';
 import { AuthTokenResponseDto } from '../application/dtos/auth-token.response.dto.js';
+import { AuthMeResponseDto } from '../application/dtos/auth-me.response.dto.js';
 import { CreateUserDto } from '../application/dtos/create-user.dto.js';
 import { UpdateUserDto } from '../application/dtos/update-user.dto.js';
 import { UserResponseDto } from '../application/dtos/user.response.dto.js';
@@ -49,6 +51,7 @@ import { GetAdminRecipientsUseCase } from '../application/use-cases/get-admin-re
 export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
+    private readonly getMeUseCase: GetMeUseCase,
     private readonly getUsersUseCase: GetUsersUseCase,
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
@@ -67,6 +70,18 @@ export class AuthController {
   @ApiResponse({ status: 429, description: 'Demasiados intentos' })
   login(@Body() dto: LoginDto): Promise<AuthTokenResponseDto> {
     return this.loginUseCase.execute(dto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener perfil actualizado del usuario autenticado',
+  })
+  @ApiResponse({ status: 200, type: AuthMeResponseDto })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  getMe(@Request() req: { user: JwtPayload }): Promise<AuthMeResponseDto> {
+    return this.getMeUseCase.execute(req.user.sub);
   }
 
   @Patch('me/password')

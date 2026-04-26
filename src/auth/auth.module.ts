@@ -12,6 +12,7 @@ import { AssociationRepository } from '../association/infrastructure/repositorie
 import { UnionRepository } from '../union/infrastructure/repositories/union.repository.js';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy.js';
 import { LoginUseCase } from './application/use-cases/login.use-case.js';
+import { GetMeUseCase } from './application/use-cases/get-me.use-case.js';
 import { GetUsersUseCase } from './application/use-cases/get-users.use-case.js';
 import { CreateUserUseCase } from './application/use-cases/create-user.use-case.js';
 import { UpdateUserUseCase } from './application/use-cases/update-user.use-case.js';
@@ -47,6 +48,7 @@ import { AuthController } from './presentation/auth.controller.js';
     UnionRepository,
     JwtStrategy,
     LoginUseCase,
+    GetMeUseCase,
     GetUsersUseCase,
     CreateUserUseCase,
     UpdateUserUseCase,

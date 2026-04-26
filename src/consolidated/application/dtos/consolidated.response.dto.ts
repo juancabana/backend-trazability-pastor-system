@@ -58,6 +58,12 @@ export class ConsolidatedResponseDto {
   @ApiProperty()
   daysInPeriod: number;
 
+  @ApiProperty({
+    description:
+      'Dias transcurridos dentro del periodo hasta hoy (limitados al fin del periodo). Para periodos pasados es igual a daysInPeriod; para periodos futuros es 0.',
+  })
+  daysElapsedInPeriod: number;
+
   @ApiProperty()
   daysWithReports: number;
 

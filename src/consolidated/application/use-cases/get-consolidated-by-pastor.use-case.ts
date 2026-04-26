@@ -13,7 +13,11 @@ import {
   SubCategoryConsolidated,
 } from '../dtos/consolidated.response.dto.js';
 import { buildPeriodMeta } from '../../../common/utils/period.util.js';
-import { countDaysInclusive } from '../helpers/period-helpers.js';
+import { formatBogotaDate, nowInBogota } from '../../../common/utils/bogota-time.util.js';
+import {
+  countDaysElapsedInPeriod,
+  countDaysInclusive,
+} from '../helpers/period-helpers.js';
 
 @Injectable()
 export class GetConsolidatedByPastorUseCase {
@@ -100,6 +104,12 @@ export class GetConsolidatedByPastorUseCase {
     }
 
     const daysInPeriod = countDaysInclusive(period.startDate, period.endDate);
+    const today = formatBogotaDate(nowInBogota());
+    const daysElapsedInPeriod = countDaysElapsedInPeriod(
+      period.startDate,
+      period.endDate,
+      today,
+    );
 
     const consolidatedCategories: CategoryConsolidated[] = categories.map(
       (cat) => {
@@ -136,11 +146,17 @@ export class GetConsolidatedByPastorUseCase {
         totalHours: Math.round(totalHours * 10) / 10,
       },
       compliance:
-        daysInPeriod > 0
-          ? Math.round((daysWithReports.size / daysInPeriod) * 100) / 100
+        daysElapsedInPeriod > 0
+          ? Math.min(
+              1,
+              Math.round(
+                (daysWithReports.size / daysElapsedInPeriod) * 100,
+              ) / 100,
+            )
           : 0,
       totalReports: reports.length,
       daysInPeriod,
+      daysElapsedInPeriod,
       daysWithReports: daysWithReports.size,
       totalTransportAmount,
     };
