@@ -42,7 +42,10 @@ export class UserRepository extends BaseRepository<UserEntity> {
     });
   }
 
-  findAllPaginated(page: number, limit: number): Promise<[UserEntity[], number]> {
+  findAllPaginated(
+    page: number,
+    limit: number,
+  ): Promise<[UserEntity[], number]> {
     return this.repo.findAndCount({
       order: { createdAt: 'ASC' },
       skip: (page - 1) * limit,

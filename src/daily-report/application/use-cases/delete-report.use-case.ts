@@ -7,6 +7,7 @@ import { DailyReportRepository } from '../../infrastructure/repositories/daily-r
 import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
 import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
 import { isDateEditable } from '../../../common/utils/period.util.js';
+import { parseBogotaDate } from '../../../common/utils/bogota-time.util.js';
 
 @Injectable()
 export class DeleteReportUseCase {
@@ -27,7 +28,9 @@ export class DeleteReportUseCase {
     }
 
     if (report.pastorId !== pastorId) {
-      throw new ForbiddenException('No puedes eliminar reportes de otro pastor');
+      throw new ForbiddenException(
+        'No puedes eliminar reportes de otro pastor',
+      );
     }
 
     const association = await this.associationRepo.findById(associationId);
@@ -35,7 +38,7 @@ export class DeleteReportUseCase {
       throw new ForbiddenException('Asociacion no encontrada');
     }
 
-    const reportDate = new Date(report.date + 'T00:00:00');
+    const reportDate = parseBogotaDate(report.date);
     if (!isDateEditable(reportDate, association.reportDeadlineDay)) {
       const pastor = await this.userRepo.findById(pastorId);
       if (!pastor?.canEditAllReports) {

@@ -10,7 +10,10 @@ import { ChurchController } from './presentation/church.controller.js';
 import { DistrictModule } from '../district/district.module.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ChurchEntity]), forwardRef(() => DistrictModule)],
+  imports: [
+    TypeOrmModule.forFeature([ChurchEntity]),
+    forwardRef(() => DistrictModule),
+  ],
   controllers: [ChurchController],
   providers: [
     ChurchRepository,

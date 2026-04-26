@@ -161,7 +161,11 @@ export class AuthController {
   @ApiOperation({
     summary: 'Listar administradores disponibles como destinatarios de correo',
   })
-  @ApiQuery({ name: 'associationId', required: true, description: 'ID de la asociación' })
+  @ApiQuery({
+    name: 'associationId',
+    required: true,
+    description: 'ID de la asociación',
+  })
   @ApiResponse({ status: 200, type: [UserResponseDto] })
   getAdminRecipients(
     @Query('associationId') associationId: string,

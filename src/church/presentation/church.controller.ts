@@ -25,7 +25,10 @@ import { CreateChurchUseCase } from '../application/use-cases/create-church.use-
 import { UpdateChurchUseCase } from '../application/use-cases/update-church.use-case.js';
 import { DeleteChurchUseCase } from '../application/use-cases/delete-church.use-case.js';
 import { CreateChurchDto } from '../application/dtos/create-church.dto.js';
-import { UpdateChurchDto, MoveChurchDto } from '../application/dtos/update-church.dto.js';
+import {
+  UpdateChurchDto,
+  MoveChurchDto,
+} from '../application/dtos/update-church.dto.js';
 import { ChurchResponseDto } from '../application/dtos/church.response.dto.js';
 
 @ApiTags('churches')
@@ -41,7 +44,9 @@ export class ChurchController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Listar iglesias (filtro por distrito o asociacion)' })
+  @ApiOperation({
+    summary: 'Listar iglesias (filtro por distrito o asociacion)',
+  })
   @ApiResponse({ status: 200, type: [ChurchResponseDto] })
   getAll(
     @Query('districtId') districtId?: string,

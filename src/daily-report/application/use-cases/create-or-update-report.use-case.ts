@@ -10,6 +10,7 @@ import { UserRepository } from '../../../auth/infrastructure/repositories/user.r
 import { CreateDailyReportDto } from '../dtos/create-daily-report.dto.js';
 import { DailyReportResponseDto } from '../dtos/daily-report.response.dto.js';
 import { isDateEditable } from '../../../common/utils/period.util.js';
+import { parseBogotaDate } from '../../../common/utils/bogota-time.util.js';
 
 @Injectable()
 export class CreateOrUpdateReportUseCase {
@@ -29,7 +30,7 @@ export class CreateOrUpdateReportUseCase {
       throw new BadRequestException('Asociacion no encontrada');
     }
 
-    const reportDate = new Date(dto.date + 'T00:00:00');
+    const reportDate = parseBogotaDate(dto.date);
     if (!isDateEditable(reportDate, association.reportDeadlineDay)) {
       const pastor = await this.userRepo.findById(pastorId);
       if (!pastor?.canEditAllReports) {
@@ -71,6 +72,10 @@ export class CreateOrUpdateReportUseCase {
       observations: report!.observations,
       createdAt: report!.createdAt,
       updatedAt: report!.updatedAt,
+      isEditable: isDateEditable(
+        parseBogotaDate(report!.date),
+        association.reportDeadlineDay,
+      ),
     };
   }
 }

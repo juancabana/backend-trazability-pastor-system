@@ -20,9 +20,18 @@ export class GetUsersUseCase {
   ): Promise<UserResponseDto[] | PaginatedUsers> {
     if (page && limit) {
       const [users, total] = associationId
-        ? await this.userRepo.findByAssociationPaginated(associationId, page, limit)
+        ? await this.userRepo.findByAssociationPaginated(
+            associationId,
+            page,
+            limit,
+          )
         : await this.userRepo.findAllPaginated(page, limit);
-      return { data: users.map(UserResponseDto.fromEntity), total, page, limit };
+      return {
+        data: users.map(UserResponseDto.fromEntity),
+        total,
+        page,
+        limit,
+      };
     }
 
     const users = associationId

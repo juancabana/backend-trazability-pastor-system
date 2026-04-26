@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -59,7 +70,9 @@ export class ConsolidatedController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN_READONLY)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Consolidado por asociacion (admin/readonly, mes/ano)' })
+  @ApiOperation({
+    summary: 'Consolidado por asociacion (admin/readonly, mes/ano)',
+  })
   @ApiQuery({ name: 'month', required: true, type: Number })
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
@@ -76,8 +89,15 @@ export class ConsolidatedController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN_READONLY)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Consolidado personalizado por pastores seleccionados (admin/readonly, mes/ano)' })
-  @ApiQuery({ name: 'pastorIds', required: true, description: 'UUIDs de pastores separados por coma' })
+  @ApiOperation({
+    summary:
+      'Consolidado personalizado por pastores seleccionados (admin/readonly, mes/ano)',
+  })
+  @ApiQuery({
+    name: 'pastorIds',
+    required: true,
+    description: 'UUIDs de pastores separados por coma',
+  })
   @ApiQuery({ name: 'month', required: true, type: Number })
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
@@ -119,7 +139,10 @@ export class ConsolidatedController {
     summary: 'Enviar consolidado por correo a administradores seleccionados',
   })
   @ApiResponse({ status: 200, type: SendConsolidatedReportResponseDto })
-  @ApiResponse({ status: 400, description: 'Sin destinatarios o IDs inválidos' })
+  @ApiResponse({
+    status: 400,
+    description: 'Sin destinatarios o IDs inválidos',
+  })
   sendReport(
     @Body() dto: SendConsolidatedReportDto,
   ): Promise<SendConsolidatedReportResponseDto> {

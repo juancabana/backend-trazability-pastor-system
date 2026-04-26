@@ -1,13 +1,20 @@
+import { nowInBogota } from './bogota-time.util.js';
+
 export interface Period {
   start: Date;
   end: Date;
 }
 
+/**
+ * Calcula el periodo de reporte vigente en zona horaria Bogota.
+ * El periodo va desde el dia (deadlineDay + 1) del mes anterior hasta el
+ * dia deadlineDay del mes actual (o del proximo mes si ya se paso).
+ */
 export function getCurrentPeriod(
   deadlineDay: number,
   referenceDate?: Date,
 ): Period {
-  const today = referenceDate || new Date();
+  const today = referenceDate ?? nowInBogota();
   const year = today.getFullYear();
   const month = today.getMonth();
   const day = today.getDate();
@@ -33,8 +40,8 @@ export function isDateInCurrentPeriod(
 }
 
 export function isDateEditable(date: Date, deadlineDay: number): boolean {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = nowInBogota();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
   if (d > today) return false;

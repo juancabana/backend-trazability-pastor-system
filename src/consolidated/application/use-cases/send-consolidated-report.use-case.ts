@@ -22,7 +22,9 @@ export class SendConsolidatedReportUseCase {
     const { recipientUserIds, associationId, month, year } = dto;
 
     if (recipientUserIds.length === 0) {
-      throw new BadRequestException('Debe seleccionar al menos un destinatario');
+      throw new BadRequestException(
+        'Debe seleccionar al menos un destinatario',
+      );
     }
 
     // Obtener candidatos admin de la asociación

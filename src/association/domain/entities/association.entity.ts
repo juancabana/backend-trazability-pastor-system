@@ -5,6 +5,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { DEFAULT_REPORT_DEADLINE_DAY } from '../../../config/constants.js';
 
 @Entity('associations')
 export class AssociationEntity {
@@ -20,7 +21,7 @@ export class AssociationEntity {
   @Column({ type: 'varchar', length: 100 })
   country: string;
 
-  @Column({ type: 'int', default: 19 })
+  @Column({ type: 'int', default: DEFAULT_REPORT_DEADLINE_DAY })
   reportDeadlineDay: number;
 
   @CreateDateColumn()

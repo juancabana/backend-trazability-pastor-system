@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -31,7 +42,9 @@ export class AssociationController {
   @Get()
   @ApiOperation({ summary: 'Listar todas las asociaciones' })
   @ApiResponse({ status: 200, type: [AssociationResponseDto] })
-  getAll(@Query('unionId') unionId?: string): Promise<AssociationResponseDto[]> {
+  getAll(
+    @Query('unionId') unionId?: string,
+  ): Promise<AssociationResponseDto[]> {
     return this.getAssociationsUseCase.execute(unionId);
   }
 
@@ -49,7 +62,9 @@ export class AssociationController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar día de cierre de la propia asociación (admin)' })
+  @ApiOperation({
+    summary: 'Actualizar día de cierre de la propia asociación (admin)',
+  })
   @ApiResponse({ status: 200, type: AssociationResponseDto })
   updateMyDeadline(
     @Request() req: { user: { associationId: string } },

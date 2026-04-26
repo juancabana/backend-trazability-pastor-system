@@ -1,10 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import type { AssociationConsolidatedResponseDto } from '../consolidated/application/dtos/consolidated.response.dto.js';
+import { COMPLIANCE_THRESHOLD } from '../config/constants.js';
 
 const MONTHS_ES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ];
 
 export interface EmailRecipient {
@@ -47,7 +58,7 @@ export class EmailService {
       activities: p.totalActivities,
       hours: p.totalHours.toFixed(1),
       compliance: Math.round(p.compliance * 100),
-      complianceOk: p.compliance >= 0.7,
+      complianceOk: p.compliance >= COMPLIANCE_THRESHOLD,
     }));
 
     const categoryRows = (data.categories ?? [])
@@ -85,6 +96,7 @@ export class EmailService {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
+        timeZone: 'America/Bogota',
       }),
     };
 

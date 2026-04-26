@@ -42,7 +42,10 @@ export class GetConsolidatedByAssociationUseCase {
     // Build subcategory accumulators
     const subAccum: Record<
       string,
-      Record<string, { name: string; unit: string; qty: number; hrs: number; amt: number }>
+      Record<
+        string,
+        { name: string; unit: string; qty: number; hrs: number; amt: number }
+      >
     > = {};
 
     for (const cat of categories) {
@@ -115,37 +118,39 @@ export class GetConsolidatedByAssociationUseCase {
     const daysInMonth = new Date(year, month, 0).getDate();
 
     // Build categories array with subcategories as arrays
-    const consolidatedCategories: CategoryConsolidated[] = categories.map((cat) => {
-      const subs = subAccum[cat.id];
-      const subcategories: SubCategoryConsolidated[] = cat.subcategories.map((sub) => {
-        const acc = subs[sub.id];
-        return {
-          subcategoryId: sub.id,
-          subcategoryName: acc.name,
-          unit: acc.unit,
-          totalQuantity: acc.qty,
-          totalHours: Math.round(acc.hrs * 10) / 10,
-          totalAmount: acc.amt,
-        };
-      });
+    const consolidatedCategories: CategoryConsolidated[] = categories.map(
+      (cat) => {
+        const subs = subAccum[cat.id];
+        const subcategories: SubCategoryConsolidated[] = cat.subcategories.map(
+          (sub) => {
+            const acc = subs[sub.id];
+            return {
+              subcategoryId: sub.id,
+              subcategoryName: acc.name,
+              unit: acc.unit,
+              totalQuantity: acc.qty,
+              totalHours: Math.round(acc.hrs * 10) / 10,
+              totalAmount: acc.amt,
+            };
+          },
+        );
 
-      return {
-        categoryId: cat.id,
-        categoryName: cat.name,
-        color: cat.color,
-        bgColor: cat.bgColor,
-        subcategories,
-      };
-    });
+        return {
+          categoryId: cat.id,
+          categoryName: cat.name,
+          color: cat.color,
+          bgColor: cat.bgColor,
+          subcategories,
+        };
+      },
+    );
 
     const pastorSummaries: PastorSummaryDto[] = pastors.map((p) => {
       const stats = pastorStats[p.id];
       return {
         pastorId: p.id,
         pastorName: p.name,
-        districtName: p.districtId
-          ? districtMap.get(p.districtId) ?? ''
-          : '',
+        districtName: p.districtId ? (districtMap.get(p.districtId) ?? '') : '',
         position: p.position,
         totalReports: stats.totalReports,
         totalActivities: stats.totalActivities,

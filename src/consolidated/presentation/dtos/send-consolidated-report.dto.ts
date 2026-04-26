@@ -1,16 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsInt,
-  IsUUID,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsArray, IsInt, IsUUID, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SendConsolidatedReportDto {
   @ApiProperty({
-    description: 'IDs de los usuarios admin/admin_readonly que recibirán el correo',
+    description:
+      'IDs de los usuarios admin/admin_readonly que recibirán el correo',
     type: [String],
   })
   @IsArray()
@@ -21,7 +16,11 @@ export class SendConsolidatedReportDto {
   @IsUUID('4')
   associationId: string;
 
-  @ApiProperty({ description: 'Mes del reporte (1-12)', minimum: 1, maximum: 12 })
+  @ApiProperty({
+    description: 'Mes del reporte (1-12)',
+    minimum: 1,
+    maximum: 12,
+  })
   @IsInt()
   @Min(1)
   @Max(12)

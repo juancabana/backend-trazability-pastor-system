@@ -51,10 +51,8 @@ export class GetConsolidatedByUnionUseCase {
       const pastorCount = consolidated.pastorSummaries.length;
       const avgCompliance =
         pastorCount > 0
-          ? consolidated.pastorSummaries.reduce(
-              (s, p) => s + p.compliance,
-              0,
-            ) / pastorCount
+          ? consolidated.pastorSummaries.reduce((s, p) => s + p.compliance, 0) /
+            pastorCount
           : 0;
 
       summaries.push({
