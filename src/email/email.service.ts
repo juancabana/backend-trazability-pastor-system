@@ -3,11 +3,11 @@ import {
   Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import type { AssociationConsolidatedResponseDto } from '../consolidated/application/dtos/consolidated.response.dto.js';
-import type { PeriodMeta } from '../common/utils/period.util.js';
-import { COMPLIANCE_THRESHOLD } from '../config/constants.js';
+import { Resend } from 'resend';
+import { compile, type TemplateDelegate } from 'handlebars';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { isEmailEnabled } from '../config/feature-flags.js';
 
 export interface EmailRecipient {
@@ -15,21 +15,55 @@ export interface EmailRecipient {
   email: string;
 }
 
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+}
+
+export interface ConsolidatedReportSummary {
+  periodLabel: string;
+  periodStart: string;
+  periodEnd: string;
+  totalPastors: number;
+  totalActivities: number;
+  totalHours: string;
+  avgCompliance: number;
+  attachmentCount: number;
+  generatedAt: string;
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly enabled: boolean;
+  private readonly resend: Resend | null = null;
+  private readonly from: string = '';
+  private readonly templateFn: TemplateDelegate<object> | null = null;
 
-  constructor(
-    private readonly mailerService: MailerService,
-    private readonly config: ConfigService,
-  ) {
+  constructor(private readonly config: ConfigService) {
     this.enabled = isEmailEnabled(this.config);
+
     if (!this.enabled) {
       this.logger.warn(
         'EmailService deshabilitado (EMAIL_ENABLED=false). El envio de correos esta apagado.',
       );
+      return;
     }
+
+    this.resend = new Resend(this.config.getOrThrow<string>('RESEND_API_KEY'));
+    this.from = this.config.getOrThrow<string>('MAIL_FROM');
+
+    const candidates = [
+      join(__dirname, 'templates', 'consolidated-report.hbs'),
+      join(process.cwd(), 'src', 'email', 'templates', 'consolidated-report.hbs'),
+    ];
+    const templatePath = candidates.find(existsSync);
+    if (!templatePath) {
+      throw new Error(
+        `Template consolidated-report.hbs no encontrado. Rutas revisadas:\n${candidates.join('\n')}`,
+      );
+    }
+    this.templateFn = compile(readFileSync(templatePath, 'utf-8'));
   }
 
   isEnabled(): boolean {
@@ -38,99 +72,43 @@ export class EmailService {
 
   async sendConsolidatedReport(
     recipients: EmailRecipient[],
-    data: AssociationConsolidatedResponseDto,
-    period: PeriodMeta,
+    summary: ConsolidatedReportSummary,
+    attachments: EmailAttachment[],
   ): Promise<void> {
-    if (!this.enabled) {
+    if (!this.enabled || !this.resend || !this.templateFn) {
       throw new ServiceUnavailableException(
-        'El envio de correos esta deshabilitado. Configurar EMAIL_ENABLED=true y las variables MAIL_* para activarlo.',
+        'El envio de correos esta deshabilitado. Configurar EMAIL_ENABLED=true y las variables RESEND_API_KEY y MAIL_FROM para activarlo.',
       );
     }
 
-    const periodLabel = period.label;
-    const subject = `Consolidado Pastoral – ${periodLabel}`;
+    const subject = `Consolidado Pastoral – ${summary.periodLabel}`;
 
-    const totalActivities = data.totals?.totalActivities ?? 0;
-    const totalHours = data.totals?.totalHours ?? 0;
-    const totalPastors = data.pastorSummaries?.length ?? 0;
+    for (const recipient of recipients) {
+      const html = this.templateFn({ ...summary, recipientName: recipient.name });
 
-    const avgCompliance =
-      totalPastors > 0
-        ? Math.round(
-            (data.pastorSummaries.reduce((s, p) => s + p.compliance, 0) /
-              totalPastors) *
-              100,
-          )
-        : 0;
+      const { error } = await this.resend.emails.send({
+        from: this.from,
+        to: recipient.email,
+        subject,
+        html,
+        attachments: attachments.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+        })),
+      });
 
-    const pastorRows = (data.pastorSummaries ?? []).map((p) => ({
-      name: p.pastorName,
-      district: p.districtName ?? '—',
-      position: p.position ?? '',
-      activities: p.totalActivities,
-      hours: p.totalHours.toFixed(1),
-      compliance: Math.round(p.compliance * 100),
-      complianceOk: p.compliance >= COMPLIANCE_THRESHOLD,
-    }));
-
-    const categoryRows = (data.categories ?? [])
-      .map((cat) => {
-        const totalQty = (cat.subcategories ?? []).reduce(
-          (s, sub) => s + sub.totalQuantity,
-          0,
+      if (error) {
+        this.logger.error(
+          `Error enviando a ${recipient.email}: ${error.message}`,
         );
-        if (totalQty === 0) return null;
-        return {
-          name: cat.categoryName,
-          color: cat.color,
-          subcategories: (cat.subcategories ?? [])
-            .filter((sub) => sub.totalQuantity > 0)
-            .map((sub) => ({
-              name: sub.subcategoryName,
-              unit: sub.unit,
-              quantity: sub.totalQuantity,
-              hours: sub.totalHours > 0 ? sub.totalHours.toFixed(1) : null,
-            })),
-        };
-      })
-      .filter(Boolean);
+        throw new Error(`Resend error para ${recipient.email}: ${error.message}`);
+      }
 
-    const context = {
-      periodLabel,
-      periodStart: period.startDate,
-      periodEnd: period.endDate,
-      totalPastors,
-      totalActivities,
-      totalHours: totalHours.toFixed(1),
-      avgCompliance,
-      pastorRows,
-      categoryRows,
-      generatedAt: new Date().toLocaleDateString('es-CO', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'America/Bogota',
-      }),
-    };
+      this.logger.log(`Correo enviado a ${recipient.email}`);
+    }
 
-    const sendPromises = recipients.map((r) =>
-      this.mailerService
-        .sendMail({
-          to: r.email,
-          subject,
-          template: 'consolidated-report',
-          context: { ...context, recipientName: r.name },
-        })
-        .catch((err: unknown) => {
-          this.logger.error(`Error enviando a ${r.email}: ${String(err)}`);
-          throw err;
-        }),
-    );
-
-    await Promise.all(sendPromises);
     this.logger.log(
-      `Reporte consolidado ${periodLabel} enviado a ${recipients.length} destinatarios`,
+      `Reporte consolidado ${summary.periodLabel} enviado a ${recipients.length} destinatario(s) con ${attachments.length} adjunto(s)`,
     );
   }
 }
-
