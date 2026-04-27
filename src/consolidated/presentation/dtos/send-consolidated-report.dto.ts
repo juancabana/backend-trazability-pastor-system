@@ -3,18 +3,42 @@ import { IsArray, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SendConsolidatedReportDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
       'IDs de los usuarios admin/admin_readonly que recibirán el correo',
     type: [String],
+    default: [],
   })
+  @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
-  recipientUserIds: string[];
+  recipientUserIds?: string[];
+
+  @ApiPropertyOptional({
+    description:
+      'IDs de correos externos guardados (association_extra_recipients) que recibirán el correo',
+    type: [String],
+    default: [],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  extraRecipientIds?: string[];
 
   @ApiProperty({ description: 'ID de la asociación' })
   @IsUUID('4')
   associationId: string;
+
+  @ApiPropertyOptional({
+    description:
+      'IDs de los pastores cuyos Excel individuales se adjuntarán. Si está vacío o ausente se incluyen todos los pastores.',
+    type: [String],
+    default: [],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  includedPastorIds?: string[];
 
   @ApiPropertyOptional({
     description:
@@ -38,4 +62,3 @@ export class SendConsolidatedReportResponseDto {
   @ApiProperty({ description: 'Emails de los destinatarios', type: [String] })
   recipients: string[];
 }
-
