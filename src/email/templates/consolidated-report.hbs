@@ -1,86 +1,308 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Consolidado Pastoral – {{periodLabel}}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f1f5f9; color: #1e293b; }
-    .wrapper { max-width: 600px; margin: 0 auto; background: #ffffff; }
-
-    .header { background: linear-gradient(135deg, #0f766e 0%, #0369a1 100%); padding: 36px 40px; }
-    .header-title { color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-    .header-sub { color: #99f6e4; font-size: 13px; margin-top: 4px; }
-    .header-period { display: inline-block; margin-top: 14px; background: rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 14px; color: #ffffff; font-size: 14px; font-weight: 600; }
-
-    .body { padding: 32px 40px; }
-    .greeting { font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 24px; }
-
-    .stats { display: flex; gap: 12px; margin-bottom: 28px; }
-    .stat-card { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; }
-    .stat-value { font-size: 26px; font-weight: 700; color: #0f766e; }
-    .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
-
-    .attachment-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px 20px; margin-bottom: 28px; }
-    .attachment-title { font-size: 13px; font-weight: 700; color: #15803d; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .attachment-desc { font-size: 13px; color: #166534; line-height: 1.6; }
-
-    .footer { padding: 24px 40px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center; }
-    .footer p { font-size: 12px; color: #94a3b8; line-height: 1.7; }
-    .footer strong { color: #64748b; }
+  <!--[if mso]>
+  <noscript>
+    <xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  </noscript>
+  <![endif]-->
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; display: block; }
+    body { margin: 0 !important; padding: 0 !important; background-color: #eef2f7; width: 100% !important; }
+    a { color: #0f766e; }
+    @media only screen and (max-width: 620px) {
+      .email-container { width: 100% !important; }
+      .stat-cell { display: block !important; width: 50% !important; float: left; }
+      .mobile-padding { padding: 24px 20px !important; }
+    }
   </style>
 </head>
-<body>
-  <div class="wrapper">
+<body style="margin:0;padding:0;background-color:#eef2f7;">
 
-    <div class="header">
-      <div class="header-title">Sistema de Trazabilidad Pastoral</div>
-      <div class="header-sub">Reporte consolidado generado automáticamente</div>
-      <div class="header-period">{{periodLabel}}</div>
-    </div>
+  <!-- Spacer top -->
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color:#eef2f7;">
+    <tr><td style="padding:32px 16px 0;">
 
-    <div class="body">
-      <p class="greeting">
-        Estimado/a <strong>{{recipientName}}</strong>,<br />
-        A continuación encontrará el resumen del periodo <strong>{{periodLabel}}</strong>.
-        Los reportes detallados están adjuntos a este correo en formato Excel.
-      </p>
+      <!-- Email container -->
+      <table class="email-container" role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" align="center"
+             style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,30,60,0.10);">
 
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-value">{{totalPastors}}</div>
-          <div class="stat-label">Pastores</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{totalActivities}}</div>
-          <div class="stat-label">Actividades</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{totalHours}}h</div>
-          <div class="stat-label">Horas</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value">{{avgCompliance}}%</div>
-          <div class="stat-label">Cumplimiento</div>
-        </div>
-      </div>
+        <!-- ═══════════════════════════ HEADER ═══════════════════════════ -->
+        <tr>
+          <td style="background:linear-gradient(150deg,#0f2d5e 0%,#1a4d8c 60%,#0f766e 100%);padding:0;">
 
-      <div class="attachment-box">
-        <div class="attachment-title">📎 Archivos adjuntos ({{attachmentCount}})</div>
-        <div class="attachment-desc">
-          Este correo incluye <strong>{{attachmentCount}} archivo(s) Excel</strong>:
-          el consolidado general de la asociación y el reporte individual de cada pastor incluido en el envío.
-        </div>
-      </div>
-    </div>
+            <!-- Logo row -->
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td style="padding:32px 40px 0;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                      <td style="vertical-align:middle;padding-right:14px;">
+                        <!-- Adventist Church logo -->
+                        {{#if logoUrl}}
+                        <img src="{{logoUrl}}"
+                             alt="Iglesia Adventista del Séptimo Día"
+                             width="48" height="48"
+                             style="display:block;width:48px;height:48px;border-radius:50%;background:#ffffff;padding:4px;" />
+                        {{/if}}
+                      </td>
+                      <td style="vertical-align:middle;">
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:600;color:#93c5fd;text-transform:uppercase;letter-spacing:1.2px;">
+                          Iglesia Adventista del Séptimo Día
+                        </div>
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;margin-top:2px;letter-spacing:-0.2px;">
+                          Sistema de Trazabilidad Pastoral
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
 
-    <div class="footer">
-      <p><strong>Sistema de Trazabilidad Pastoral</strong></p>
-      <p>Este correo fue generado automáticamente el {{generatedAt}}.</p>
-      <p>Por favor no responda a este mensaje.</p>
-    </div>
+              <!-- Title row -->
+              <tr>
+                <td style="padding:20px 40px 28px;">
+                  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;line-height:1.2;">
+                    Reporte Consolidado
+                  </div>
+                  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#7dd3fc;margin-top:6px;">
+                    Generado automáticamente el {{generatedAt}}
+                  </div>
 
-  </div>
+                  <!-- Period badge -->
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:16px;">
+                    <tr>
+                      <td style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;padding:8px 18px;">
+                        <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:14px;font-weight:700;color:#ffffff;">
+                          📅 &nbsp;{{periodLabel}}
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════ GREETING ═══════════════════════════ -->
+        <tr>
+          <td class="mobile-padding" style="padding:36px 40px 0;">
+            <p style="font-family:'Segoe UI',Arial,sans-serif;font-size:15px;color:#334155;line-height:1.7;margin:0;">
+              Estimado/a <strong style="color:#1e293b;">{{recipientName}}</strong>,
+            </p>
+            <p style="font-family:'Segoe UI',Arial,sans-serif;font-size:15px;color:#475569;line-height:1.7;margin:10px 0 0;">
+              A continuación encontrará el resumen del periodo <strong style="color:#0f2d5e;">{{periodLabel}}</strong>.
+              Los reportes detallados se encuentran adjuntos a este correo en formato Excel.
+            </p>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════ DIVIDER ═══════════════════════════ -->
+        <tr>
+          <td style="padding:28px 40px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td style="border-top:1px solid #e2e8f0;font-size:0;line-height:0;">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Section label -->
+        <tr>
+          <td style="padding:20px 40px 12px;">
+            <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.4px;">
+              Resumen del periodo
+            </span>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════ STATS CARDS ═══════════════════════════ -->
+        <tr>
+          <td style="padding:0 40px;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+
+                <!-- Stat: Pastores -->
+                <td class="stat-cell" width="25%" style="padding:0 6px 0 0;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:16px 12px;text-align:center;">
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:800;color:#0369a1;line-height:1;">
+                          {{totalPastors}}
+                        </div>
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;color:#7cb9d6;text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;">
+                          Pastores
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+
+                <!-- Stat: Actividades -->
+                <td class="stat-cell" width="25%" style="padding:0 6px;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 12px;text-align:center;">
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:800;color:#15803d;line-height:1;">
+                          {{totalActivities}}
+                        </div>
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;color:#6dbd8a;text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;">
+                          Actividades
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+
+                <!-- Stat: Horas -->
+                <td class="stat-cell" width="25%" style="padding:0 6px;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:16px 12px;text-align:center;">
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:800;color:#7e22ce;line-height:1;">
+                          {{totalHours}}<span style="font-size:16px;font-weight:600;">h</span>
+                        </div>
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;color:#b89adb;text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;">
+                          Horas
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+
+                <!-- Stat: Cumplimiento -->
+                <td class="stat-cell" width="25%" style="padding:0 0 0 6px;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:16px 12px;text-align:center;">
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:28px;font-weight:800;color:#0f766e;line-height:1;">
+                          {{avgCompliance}}<span style="font-size:16px;font-weight:600;">%</span>
+                        </div>
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:10px;font-weight:600;color:#5fb8ae;text-transform:uppercase;letter-spacing:0.8px;margin-top:6px;">
+                          Cumplimiento
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════ PERIOD DETAIL ═══════════════════════════ -->
+        <tr>
+          <td style="padding:24px 40px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #0f2d5e;border-radius:0 12px 12px 0;padding:16px 20px;">
+                  <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:12px;font-weight:700;color:#0f2d5e;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">
+                    Detalle del periodo
+                  </div>
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#64748b;padding-bottom:4px;">
+                        <span style="color:#94a3b8;">Inicio:</span>
+                        &nbsp;<strong style="color:#334155;">{{periodStart}}</strong>
+                      </td>
+                      <td style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#64748b;padding-bottom:4px;">
+                        <span style="color:#94a3b8;">Cierre:</span>
+                        &nbsp;<strong style="color:#334155;">{{periodEnd}}</strong>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════ ATTACHMENTS ═══════════════════════════ -->
+        <tr>
+          <td style="padding:20px 40px 0;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:20px 22px;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td width="36" style="vertical-align:top;padding-right:14px;">
+                        <div style="width:36px;height:36px;background:#16a34a;border-radius:8px;text-align:center;line-height:36px;font-size:18px;">
+                          📎
+                        </div>
+                      </td>
+                      <td style="vertical-align:top;">
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;font-weight:700;color:#15803d;margin-bottom:6px;">
+                          {{attachmentCount}} archivo(s) adjunto(s)
+                        </div>
+                        <div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#166534;line-height:1.6;">
+                          Este correo incluye el <strong>consolidado general</strong> de la asociación
+                          y el <strong>reporte individual</strong> de cada pastor incluido en el envío,
+                          todos en formato Excel (.xlsx).
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════ SPACER ═══════════════════════════ -->
+        <tr><td style="height:36px;">&nbsp;</td></tr>
+
+        <!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+        <tr>
+          <td style="background:#f1f5f9;border-top:1px solid #e2e8f0;padding:28px 40px;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              <tr>
+                <td style="text-align:center;">
+                  <!-- Footer logo row -->
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 14px;">
+                    <tr>
+                      {{#if logoUrl}}
+                      <td style="vertical-align:middle;padding-right:8px;">
+                        <img src="{{logoUrl}}"
+                             alt="IASD" width="22" height="22"
+                             style="display:block;width:22px;height:22px;opacity:0.6;" />
+                      </td>
+                      {{/if}}
+                      <td style="vertical-align:middle;">
+                        <span style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;font-weight:700;color:#475569;">
+                          Sistema de Trazabilidad Pastoral
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#94a3b8;line-height:1.7;margin:0 0 4px;">
+                    Este correo fue generado automáticamente el <strong style="color:#64748b;">{{generatedAt}}</strong>
+                  </p>
+                  <p style="font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#94a3b8;line-height:1.7;margin:0;">
+                    Por favor no responda a este mensaje.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+      <!-- /Email container -->
+
+    </td></tr>
+    <tr><td style="height:32px;">&nbsp;</td></tr>
+  </table>
+
 </body>
 </html>

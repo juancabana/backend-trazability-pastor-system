@@ -6,9 +6,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { compile, type TemplateDelegate } from 'handlebars';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'path';
 import { isEmailEnabled } from '../config/feature-flags.js';
+
+const DEFAULT_LOGO_PATH = '/iasd-logo-ligth.png';
 
 export interface EmailRecipient {
   name: string;
@@ -39,6 +41,7 @@ export class EmailService {
   private readonly resend: Resend | null = null;
   private readonly from: string = '';
   private readonly templateFn: TemplateDelegate<object> | null = null;
+  private readonly logoUrl: string = '';
 
   constructor(private readonly config: ConfigService) {
     this.enabled = isEmailEnabled(this.config);
@@ -55,7 +58,13 @@ export class EmailService {
 
     const candidates = [
       join(__dirname, 'templates', 'consolidated-report.hbs'),
-      join(process.cwd(), 'src', 'email', 'templates', 'consolidated-report.hbs'),
+      join(
+        process.cwd(),
+        'src',
+        'email',
+        'templates',
+        'consolidated-report.hbs',
+      ),
     ];
     const templatePath = candidates.find(existsSync);
     if (!templatePath) {
@@ -64,6 +73,21 @@ export class EmailService {
       );
     }
     this.templateFn = compile(readFileSync(templatePath, 'utf-8'));
+
+    const explicitLogoUrl = this.config.get<string>('EMAIL_LOGO_URL');
+    if (explicitLogoUrl && /^https?:\/\//i.test(explicitLogoUrl)) {
+      this.logoUrl = explicitLogoUrl;
+    } else {
+      const frontendUrlRaw = this.config.get<string>('FRONTEND_URL') ?? '';
+      const firstFrontendUrl = frontendUrlRaw.split(',')[0]?.trim() ?? '';
+      if (/^https?:\/\//i.test(firstFrontendUrl)) {
+        this.logoUrl = `${firstFrontendUrl.replace(/\/$/, '')}${DEFAULT_LOGO_PATH}`;
+      } else {
+        this.logger.warn(
+          'No se pudo construir la URL del logo (define EMAIL_LOGO_URL o FRONTEND_URL absoluta).',
+        );
+      }
+    }
   }
 
   isEnabled(): boolean {
@@ -84,7 +108,11 @@ export class EmailService {
     const subject = `Consolidado Pastoral – ${summary.periodLabel}`;
 
     for (const recipient of recipients) {
-      const html = this.templateFn({ ...summary, recipientName: recipient.name });
+      const html = this.templateFn({
+        ...summary,
+        recipientName: recipient.name,
+        logoUrl: this.logoUrl,
+      });
 
       const { error } = await this.resend.emails.send({
         from: this.from,
@@ -101,7 +129,9 @@ export class EmailService {
         this.logger.error(
           `Error enviando a ${recipient.email}: ${error.message}`,
         );
-        throw new Error(`Resend error para ${recipient.email}: ${error.message}`);
+        throw new Error(
+          `Resend error para ${recipient.email}: ${error.message}`,
+        );
       }
 
       this.logger.log(`Correo enviado a ${recipient.email}`);
