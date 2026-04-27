@@ -28,9 +28,11 @@ export const COMPLIANCE_THRESHOLD = 0.7;
 export const COMPLIANCE_AMBER_THRESHOLD = 0.4;
 
 // Dia limite de reporte por defecto y maximo permitido.
-// Maximo 28 para evitar problemas con febrero.
+// Maximo 27: el inicio del periodo es deadlineDay + 1, y el dia 28 existe
+// en todos los meses (incluido febrero). Con 28 el inicio seria el 29, que
+// no existe en febrero de anos no bisiestos y causaria desbordamiento de fecha.
 export const DEFAULT_REPORT_DEADLINE_DAY = 20;
-export const MAX_REPORT_DEADLINE_DAY = 28;
+export const MAX_REPORT_DEADLINE_DAY = 27;
 export const MIN_REPORT_DEADLINE_DAY = 1;
 
 // Rango de anios validos para filtros y queries.

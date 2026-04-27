@@ -55,8 +55,11 @@ export class AssociationController {
   ) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar todas las asociaciones' })
   @ApiResponse({ status: 200, type: [AssociationResponseDto] })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
   getAll(
     @Query('unionId') unionId?: string,
   ): Promise<AssociationResponseDto[]> {

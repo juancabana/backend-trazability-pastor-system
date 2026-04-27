@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -8,6 +9,7 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -33,6 +35,7 @@ import {
   AssociationConsolidatedResponseDto,
 } from '../application/dtos/consolidated.response.dto.js';
 import { parsePeriodOffset } from '../../common/utils/period.util.js';
+import type { JwtPayload } from '../../auth/infrastructure/strategies/jwt.strategy.js';
 import { SendConsolidatedReportUseCase } from '../application/use-cases/send-consolidated-report.use-case.js';
 import {
   SendConsolidatedReportDto,
@@ -64,10 +67,15 @@ export class ConsolidatedController {
     description: '0=actual, -1=anterior, +1=siguiente. Default: 0.',
   })
   @ApiResponse({ status: 200, type: ConsolidatedResponseDto })
+  @ApiResponse({ status: 403, description: 'Un pastor solo puede ver su propio consolidado' })
   getByPastor(
+    @Request() req: { user: JwtPayload },
     @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
     @Query('periodOffset') periodOffset?: string,
   ): Promise<ConsolidatedResponseDto> {
+    if (req.user.role === UserRole.PASTOR && req.user.sub !== pastorId) {
+      throw new ForbiddenException('Solo puedes ver tu propio consolidado');
+    }
     const offset = parsePeriodOffset(periodOffset);
     return this.getByPastorUseCase.execute(pastorId, offset);
   }
@@ -82,10 +90,20 @@ export class ConsolidatedController {
   })
   @ApiQuery({ name: 'periodOffset', required: false, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
+  @ApiResponse({ status: 403, description: 'Solo puedes consultar el consolidado de tu propia asociacion' })
   getByAssociation(
+    @Request() req: { user: JwtPayload },
     @Param('associationId', new ParseUUIDPipe()) associationId: string,
     @Query('periodOffset') periodOffset?: string,
   ): Promise<AssociationConsolidatedResponseDto> {
+    if (
+      req.user.role !== UserRole.SUPER_ADMIN &&
+      req.user.associationId !== associationId
+    ) {
+      throw new ForbiddenException(
+        'Solo puedes consultar el consolidado de tu propia asociacion',
+      );
+    }
     const offset = parsePeriodOffset(periodOffset);
     return this.getByAssociationUseCase.execute(associationId, offset);
   }
@@ -105,7 +123,9 @@ export class ConsolidatedController {
   })
   @ApiQuery({ name: 'periodOffset', required: false, type: Number })
   @ApiResponse({ status: 200, type: AssociationConsolidatedResponseDto })
+  @ApiResponse({ status: 403, description: 'Los pastores seleccionados no pertenecen a tu asociacion' })
   getByPastors(
+    @Request() req: { user: JwtPayload },
     @Query('pastorIds') pastorIds: string,
     @Query('periodOffset') periodOffset?: string,
   ): Promise<AssociationConsolidatedResponseDto> {
@@ -114,7 +134,12 @@ export class ConsolidatedController {
       .map((id) => id.trim())
       .filter(Boolean);
     const offset = parsePeriodOffset(periodOffset);
-    return this.getByPastorsUseCase.execute(ids, offset);
+    // super_admin puede consultar cualquier pastor; admin/readonly solo los de su asociacion
+    const requesterAssociationId =
+      req.user.role === UserRole.SUPER_ADMIN
+        ? undefined
+        : (req.user.associationId ?? undefined);
+    return this.getByPastorsUseCase.execute(ids, offset, requesterAssociationId);
   }
 
   @Get('union/:unionId')
