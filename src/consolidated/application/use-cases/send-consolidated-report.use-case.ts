@@ -4,8 +4,6 @@ import { ExtraRecipientRepository } from '../../../association/infrastructure/re
 import { EmailService } from '../../../email/email.service.js';
 import { ExcelGeneratorService } from '../../../email/excel-generator.service.js';
 import { GetAssociationForEmailUseCase } from './get-association-for-email.use-case.js';
-import { UserRole } from '../../../common/enums/user-role.enum.js';
-import { COMPLIANCE_THRESHOLD } from '../../../config/constants.js';
 import type {
   SendConsolidatedReportDto,
   SendConsolidatedReportResponseDto,
@@ -49,15 +47,6 @@ export class SendConsolidatedReportUseCase {
       if (invalid.length > 0) {
         throw new BadRequestException(
           `Los siguientes IDs no corresponden a administradores de esta asociación: ${invalid.join(', ')}`,
-        );
-      }
-
-      const pastorIds = recipientUserIds.filter(
-        (id) => adminMap.get(id)?.role === UserRole.PASTOR,
-      );
-      if (pastorIds.length > 0) {
-        throw new BadRequestException(
-          'Solo se pueden enviar correos a usuarios con rol administrador',
         );
       }
 
