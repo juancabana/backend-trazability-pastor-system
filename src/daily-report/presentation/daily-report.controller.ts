@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   ParseUUIDPipe,
@@ -70,11 +71,16 @@ export class DailyReportController {
   @ApiQuery({ name: 'month', required: false, type: Number })
   @ApiQuery({ name: 'year', required: false, type: Number })
   @ApiResponse({ status: 200, type: [DailyReportResponseDto] })
+  @ApiResponse({ status: 403, description: 'Un pastor solo puede ver sus propios reportes' })
   getByPastor(
+    @Request() req: { user: JwtPayload },
     @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
     @Query('month') month?: string,
     @Query('year') year?: string,
   ): Promise<DailyReportResponseDto[]> {
+    if (req.user.role === UserRole.PASTOR && req.user.sub !== pastorId) {
+      throw new ForbiddenException('Solo puedes consultar tus propios reportes');
+    }
     return this.getReportsByPastorUseCase.execute(
       pastorId,
       month ? parseMonth(month) : undefined,
@@ -87,10 +93,15 @@ export class DailyReportController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener reporte por pastor y fecha' })
   @ApiResponse({ status: 200, type: DailyReportResponseDto })
+  @ApiResponse({ status: 403, description: 'Un pastor solo puede ver sus propios reportes' })
   getByPastorAndDate(
+    @Request() req: { user: JwtPayload },
     @Param('pastorId', new ParseUUIDPipe()) pastorId: string,
     @Param('date') date: string,
   ): Promise<DailyReportResponseDto> {
+    if (req.user.role === UserRole.PASTOR && req.user.sub !== pastorId) {
+      throw new ForbiddenException('Solo puedes consultar tus propios reportes');
+    }
     return this.getReportByPastorAndDateUseCase.execute(pastorId, date);
   }
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { DailyReportRepository } from '../../../daily-report/infrastructure/repositories/daily-report.repository.js';
 import { ActivityCategoryRepository } from '../../../activity-category/infrastructure/repositories/activity-category.repository.js';
 import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
@@ -27,6 +27,7 @@ export class GetConsolidatedByPastorsUseCase {
   async execute(
     pastorIds: string[],
     periodOffset: number,
+    requesterAssociationId?: string,
   ): Promise<AssociationConsolidatedResponseDto> {
     if (pastorIds.length === 0) {
       const fallback = buildPeriodMeta(
@@ -47,6 +48,19 @@ export class GetConsolidatedByPastorsUseCase {
       throw new NotFoundException(
         'Ningún pastor encontrado con los IDs proporcionados',
       );
+    }
+
+    // Si se proporciona requesterAssociationId (admin/admin_readonly), verificar
+    // que todos los pastores solicitados pertenecen a esa asociacion.
+    if (requesterAssociationId) {
+      const foreignPastors = pastors.filter(
+        (p) => p.associationId !== requesterAssociationId,
+      );
+      if (foreignPastors.length > 0) {
+        throw new ForbiddenException(
+          'Algunos pastores seleccionados no pertenecen a tu asociacion',
+        );
+      }
     }
 
     // Resolvemos el deadlineDay desde la asociación del primer pastor.
