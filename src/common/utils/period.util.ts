@@ -35,6 +35,17 @@ const MONTHS_ES_SHORT = [
 ];
 
 /**
+ * Construye un Date clampeando el dia al ultimo dia valido del mes.
+ * Necesario porque `deadlineDay + 1` puede ser 29 cuando deadlineDay = 28,
+ * y febrero en anos no bisiestos solo tiene 28 dias; sin este helper
+ * `new Date(year, 1, 29)` desbordaria a 1 de marzo.
+ */
+function safeDate(year: number, month: number, day: number): Date {
+  const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+  return new Date(year, month, Math.min(day, lastDayOfMonth));
+}
+
+/**
  * Calcula el periodo de reporte vigente en zona horaria Bogota.
  * El periodo va desde el dia (deadlineDay + 1) del mes anterior hasta el
  * dia deadlineDay del mes actual (o del proximo mes si ya se paso).
@@ -49,12 +60,12 @@ export function getCurrentPeriod(
   const day = today.getDate();
 
   if (day <= deadlineDay) {
-    const startDate = new Date(year, month - 1, deadlineDay + 1);
-    const endDate = new Date(year, month, deadlineDay);
+    const startDate = safeDate(year, month - 1, deadlineDay + 1);
+    const endDate = safeDate(year, month, deadlineDay);
     return { start: startDate, end: endDate };
   } else {
-    const startDate = new Date(year, month, deadlineDay + 1);
-    const endDate = new Date(year, month + 1, deadlineDay);
+    const startDate = safeDate(year, month, deadlineDay + 1);
+    const endDate = safeDate(year, month + 1, deadlineDay);
     return { start: startDate, end: endDate };
   }
 }
@@ -77,12 +88,13 @@ export function getPeriodAtOffset(
   if (offset === 0) return current;
 
   // Avanzamos/retrocedemos `offset` meses sobre las fechas de inicio y fin.
-  const start = new Date(
+  // Se usa safeDate para evitar desbordamiento (e.g. dia 29 en febrero no bisiesto).
+  const start = safeDate(
     current.start.getFullYear(),
     current.start.getMonth() + offset,
     current.start.getDate(),
   );
-  const end = new Date(
+  const end = safeDate(
     current.end.getFullYear(),
     current.end.getMonth() + offset,
     current.end.getDate(),

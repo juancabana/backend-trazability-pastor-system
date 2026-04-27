@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -50,9 +51,14 @@ export class DailyReportController {
     @Request() req: { user: JwtPayload },
     @Body() dto: CreateDailyReportDto,
   ): Promise<DailyReportResponseDto> {
+    if (!req.user.associationId) {
+      throw new BadRequestException(
+        'El usuario no tiene una asociacion asignada',
+      );
+    }
     return this.createOrUpdateReportUseCase.execute(
       req.user.sub,
-      req.user.associationId!,
+      req.user.associationId,
       dto,
     );
   }
@@ -98,10 +104,15 @@ export class DailyReportController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Request() req: { user: JwtPayload },
   ): Promise<void> {
+    if (!req.user.associationId) {
+      throw new BadRequestException(
+        'El usuario no tiene una asociacion asignada',
+      );
+    }
     return this.deleteReportUseCase.execute(
       id,
       req.user.sub,
-      req.user.associationId!,
+      req.user.associationId,
     );
   }
 }

@@ -85,8 +85,13 @@ export class AssociationController {
     @Request() req: { user: JwtPayload },
     @Body() dto: UpdateDeadlineDayDto,
   ): Promise<AssociationResponseDto> {
+    if (!req.user.associationId) {
+      throw new ForbiddenException(
+        'El usuario no tiene una asociacion asignada',
+      );
+    }
     return this.updateAssociationDeadlineUseCase.execute(
-      req.user.associationId!,
+      req.user.associationId,
       dto.reportDeadlineDay,
     );
   }

@@ -1,5 +1,6 @@
 import {
   IsString,
+  IsNotEmpty,
   IsOptional,
   IsBoolean,
   MinLength,
@@ -14,6 +15,7 @@ export class UpdateUserDto {
   @ApiPropertyOptional({ example: 'Ptr. Carlos Mendoza' })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @MaxLength(100)
   name?: string;
 
