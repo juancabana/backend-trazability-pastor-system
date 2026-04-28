@@ -68,8 +68,16 @@ export class AuthController {
   @ApiResponse({ status: 200, type: AuthTokenResponseDto })
   @ApiResponse({ status: 401, description: 'Credenciales invalidas' })
   @ApiResponse({ status: 429, description: 'Demasiados intentos' })
-  login(@Body() dto: LoginDto): Promise<AuthTokenResponseDto> {
-    return this.loginUseCase.execute(dto);
+  login(
+    @Body() dto: LoginDto,
+    @Request() req: { ip?: string; socket: { remoteAddress?: string }; headers: Record<string, string | string[] | undefined> },
+  ): Promise<AuthTokenResponseDto> {
+    const ip =
+      (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+      req.ip ??
+      req.socket.remoteAddress ??
+      'unknown';
+    return this.loginUseCase.execute(dto, ip);
   }
 
   @Get('me')
@@ -142,8 +150,11 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear usuario (admin)' })
   @ApiResponse({ status: 201, type: UserResponseDto })
-  createUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
-    return this.createUserUseCase.execute(dto);
+  createUser(
+    @Request() req: { user: JwtPayload },
+    @Body() dto: CreateUserDto,
+  ): Promise<UserResponseDto> {
+    return this.createUserUseCase.execute(dto, req.user.role as UserRole);
   }
 
   @Patch('users/:id')
@@ -153,10 +164,11 @@ export class AuthController {
   @ApiOperation({ summary: 'Actualizar usuario (admin)' })
   @ApiResponse({ status: 200, type: UserResponseDto })
   updateUser(
+    @Request() req: { user: JwtPayload },
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    return this.updateUserUseCase.execute(id, dto);
+    return this.updateUserUseCase.execute(id, dto, req.user.role as UserRole);
   }
 
   @Delete('users/:id')
@@ -165,8 +177,11 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar usuario (admin)' })
   @ApiResponse({ status: 200 })
-  deleteUser(@Param('id', new ParseUUIDPipe()) id: string): Promise<void> {
-    return this.deleteUserUseCase.execute(id);
+  deleteUser(
+    @Request() req: { user: JwtPayload },
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
+    return this.deleteUserUseCase.execute(id, req.user.role as UserRole);
   }
 
   @Get('admin-recipients')

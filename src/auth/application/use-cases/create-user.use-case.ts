@@ -1,15 +1,20 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from '../../infrastructure/repositories/user.repository.js';
 import { CreateUserDto } from '../dtos/create-user.dto.js';
 import { UserResponseDto } from '../dtos/user.response.dto.js';
 import { BCRYPT_ROUNDS } from '../../../config/constants.js';
+import { UserRole } from '../../../common/enums/user-role.enum.js';
 
 @Injectable()
 export class CreateUserUseCase {
   constructor(private readonly userRepo: UserRepository) {}
 
-  async execute(dto: CreateUserDto): Promise<UserResponseDto> {
+  async execute(dto: CreateUserDto, callerRole: UserRole): Promise<UserResponseDto> {
+    if (dto.role === UserRole.OWNER && callerRole !== UserRole.OWNER) {
+      throw new ForbiddenException('Solo el owner puede crear otro usuario owner');
+    }
+
     const existing = await this.userRepo.findByEmail(
       dto.email.toLowerCase().trim(),
     );

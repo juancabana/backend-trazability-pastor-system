@@ -9,6 +9,7 @@ import { ChurchEntity } from '../../church/domain/entities/church.entity.js';
 import { ActivityCategoryEntity } from '../../activity-category/domain/entities/activity-category.entity.js';
 import { UserEntity } from '../../auth/domain/entities/user.entity.js';
 import { DailyReportEntity } from '../../daily-report/domain/entities/daily-report.entity.js';
+import { AuditLogEntity } from '../../audit-log/domain/entities/audit-log.entity.js';
 import { ACTIVITY_CATEGORY_SEEDS } from '../../activity-category/infrastructure/seeds/activity-category.seed.js';
 import { UserRole } from '../../common/enums/user-role.enum.js';
 
@@ -28,6 +29,7 @@ async function runSeeds() {
       ActivityCategoryEntity,
       UserEntity,
       DailyReportEntity,
+      AuditLogEntity,
     ],
     synchronize: true,
     logging: false,
@@ -588,6 +590,20 @@ async function runSeeds() {
     unionId: unionSur.id,
     position: null,
     phone: null,
+  });
+
+  // Owner — acceso total al sistema, solo para el administrador del sistema
+  userData.push({
+    name: 'Owner Sistema',
+    email: 'owner@demo.com',
+    role: UserRole.OWNER,
+    passwordHash,
+    associationId: null,
+    districtId: null,
+    unionId: null,
+    position: null,
+    phone: null,
+    mustChangePassword: true,
   });
 
   const users = await userRepo.save(userRepo.create(userData));
