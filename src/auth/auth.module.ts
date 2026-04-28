@@ -21,11 +21,13 @@ import { ChangeOwnPasswordUseCase } from './application/use-cases/change-own-pas
 import { GetAdminRecipientsUseCase } from './application/use-cases/get-admin-recipients.use-case.js';
 import { RolesGuard } from './guards/roles.guard.js';
 import { AuthController } from './presentation/auth.controller.js';
+import { AuditLogModule } from '../audit-log/audit-log.module.js';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, AssociationEntity, UnionEntity]),
     PassportModule,
+    AuditLogModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

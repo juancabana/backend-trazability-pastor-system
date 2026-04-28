@@ -1,18 +1,27 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { UserRepository } from '../../infrastructure/repositories/user.repository.js';
 import { UpdateUserDto } from '../dtos/update-user.dto.js';
 import { UserResponseDto } from '../dtos/user.response.dto.js';
 import { BCRYPT_ROUNDS } from '../../../config/constants.js';
+import { UserRole } from '../../../common/enums/user-role.enum.js';
 
 @Injectable()
 export class UpdateUserUseCase {
   constructor(private readonly userRepo: UserRepository) {}
 
-  async execute(id: string, dto: UpdateUserDto): Promise<UserResponseDto> {
+  async execute(id: string, dto: UpdateUserDto, callerRole: UserRole): Promise<UserResponseDto> {
     const user = await this.userRepo.findById(id);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
+    }
+
+    // Solo un owner puede modificar a otro owner o asignar el rol owner
+    if (user.role === UserRole.OWNER && callerRole !== UserRole.OWNER) {
+      throw new ForbiddenException('No tienes permiso para modificar un usuario owner');
+    }
+    if (dto.role === UserRole.OWNER && callerRole !== UserRole.OWNER) {
+      throw new ForbiddenException('Solo el owner puede asignar el rol owner');
     }
 
     const updates: Record<string, unknown> = {};

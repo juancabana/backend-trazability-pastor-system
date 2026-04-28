@@ -14,6 +14,7 @@ export const ROLE_HIERARCHY: Record<string, number> = {
   [UserRole.ADMIN_READONLY]: 1,
   [UserRole.ADMIN]: 2,
   [UserRole.SUPER_ADMIN]: 3,
+  [UserRole.OWNER]: 4,
 };
 
 // ===== Reglas de negocio =====

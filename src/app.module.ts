@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -13,6 +13,8 @@ import { DailyReportModule } from './daily-report/daily-report.module.js';
 import { ConsolidatedModule } from './consolidated/consolidated.module.js';
 import { UnionModule } from './union/union.module.js';
 import { ChurchModule } from './church/church.module.js';
+import { AuditLogModule } from './audit-log/audit-log.module.js';
+import { AsyncAuditInterceptor } from './audit-log/application/interceptors/async-audit.interceptor.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -38,8 +40,13 @@ import { AppService } from './app.service.js';
     ConsolidatedModule,
     UnionModule,
     ChurchModule,
+    AuditLogModule,
   ],
   controllers: [AppController],
-  providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_INTERCEPTOR, useClass: AsyncAuditInterceptor },
+  ],
 })
 export class AppModule {}
