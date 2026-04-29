@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsBoolean,
+  IsEmail,
   MinLength,
   MaxLength,
   IsEnum,
@@ -18,6 +19,12 @@ export class UpdateUserDto {
   @IsNotEmpty()
   @MaxLength(100)
   name?: string;
+
+  @ApiPropertyOptional({ example: 'pastor@iglesia.com' })
+  @IsOptional()
+  @IsEmail()
+  @MaxLength(150)
+  email?: string;
 
   @ApiPropertyOptional({ example: 'newpassword' })
   @IsOptional()
