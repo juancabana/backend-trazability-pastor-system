@@ -24,7 +24,7 @@ export class DeleteSubcategoryUseCase {
     }
 
     const newSubcategories = category.subcategories.map((s) =>
-      s.id === subcategoryId ? { ...s, isActive: false } : { ...s, isActive: s.isActive ?? true },
+      s.id === subcategoryId ? { ...s, isActive: false } : s,
     );
 
     await this.repo.saveSubcategories(categoryId, newSubcategories);

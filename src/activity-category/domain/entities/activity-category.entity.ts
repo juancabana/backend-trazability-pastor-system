@@ -8,8 +8,7 @@ export interface SubCategory {
   unit: SubCategoryUnit;
   hasHours: boolean;
   description?: string;
-  /** Soft-delete flag. Undefined on legacy rows → treated as true. */
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 @Entity('activity_categories')

@@ -14,11 +14,7 @@ export class GetActivityCategoriesUseCase {
       color: c.color,
       bgColor: c.bgColor,
       borderColor: c.borderColor,
-      // Normalize legacy rows that predate the isActive field (treat missing as true)
-      subcategories: c.subcategories.map((s) => ({
-        ...s,
-        isActive: s.isActive ?? true,
-      })),
+      subcategories: c.subcategories,
       sortOrder: c.sortOrder,
     }));
   }

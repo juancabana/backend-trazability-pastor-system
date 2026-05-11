@@ -22,12 +22,11 @@ export class RestoreSubcategoryUseCase {
       );
     }
 
-    const newSubcategories = category.subcategories.map((s) => ({
-      ...s,
-      isActive: s.id === subcategoryId ? true : (s.isActive ?? true),
-    }));
+    const newSubcategories = category.subcategories.map((s) =>
+      s.id === subcategoryId ? { ...s, isActive: true } : s,
+    );
 
     const saved = await this.repo.saveSubcategories(categoryId, newSubcategories);
-    return { ...saved!.subcategories[index], isActive: true };
+    return saved!.subcategories[index];
   }
 }
