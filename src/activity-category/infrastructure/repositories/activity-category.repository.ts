@@ -16,4 +16,12 @@ export class ActivityCategoryRepository extends BaseRepository<ActivityCategoryE
   findAll(): Promise<ActivityCategoryEntity[]> {
     return this.repo.find({ order: { sortOrder: 'ASC' } });
   }
+
+  async saveSubcategories(
+    categoryId: string,
+    subcategories: ActivityCategoryEntity['subcategories'],
+  ): Promise<ActivityCategoryEntity | null> {
+    await this.repo.update(categoryId, { subcategories } as any);
+    return this.findById(categoryId);
+  }
 }

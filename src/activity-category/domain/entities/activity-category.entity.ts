@@ -1,11 +1,14 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
+export type SubCategoryUnit = 'cantidad' | 'horas' | 'veces' | 'dias' | 'noches';
+
 export interface SubCategory {
   id: string;
   name: string;
-  unit: 'cantidad' | 'horas' | 'veces' | 'dias' | 'noches';
+  unit: SubCategoryUnit;
   hasHours: boolean;
   description?: string;
+  isActive: boolean;
 }
 
 @Entity('activity_categories')
