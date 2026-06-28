@@ -67,6 +67,15 @@ export class ActivityEntryDto {
   visitedName?: string;
 
   @ApiPropertyOptional({
+    example: '+57 300 123 4567',
+    description: 'Numero de WhatsApp de la persona visitada (solo aplica para subcategoria visitacion).',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  whatsappPhone?: string;
+
+  @ApiPropertyOptional({
     example: 'Acompanamiento espiritual tras perdida familiar.',
     description: 'Motivo de la visita (solo aplica para subcategoria visitacion).',
   })
