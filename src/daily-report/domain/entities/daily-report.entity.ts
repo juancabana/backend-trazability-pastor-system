@@ -16,6 +16,9 @@ export interface ActivityEntry {
   hours?: number;
   amount?: number;
   evidenceUrls?: string[];
+  churchName?: string;
+  visitedName?: string;
+  visitReason?: string;
 }
 
 @Entity('daily_reports')

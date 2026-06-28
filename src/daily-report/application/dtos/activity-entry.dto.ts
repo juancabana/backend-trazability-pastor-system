@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsArray,
   Min,
+  MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -46,4 +47,31 @@ export class ActivityEntryDto {
   @IsArray()
   @IsString({ each: true })
   evidenceUrls?: string[];
+
+  @ApiPropertyOptional({
+    example: 'Iglesia Central',
+    description: 'Nombre de la iglesia visitada (solo aplica para subcategoria visitacion).',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  churchName?: string;
+
+  @ApiPropertyOptional({
+    example: 'Maria Perez',
+    description: 'Nombre de la persona visitada (solo aplica para subcategoria visitacion).',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  visitedName?: string;
+
+  @ApiPropertyOptional({
+    example: 'Acompanamiento espiritual tras perdida familiar.',
+    description: 'Motivo de la visita (solo aplica para subcategoria visitacion).',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  visitReason?: string;
 }
