@@ -18,6 +18,7 @@ export interface ActivityEntry {
   evidenceUrls?: string[];
   churchName?: string;
   visitedName?: string;
+  whatsappPhone?: string;
   visitReason?: string;
 }
 
