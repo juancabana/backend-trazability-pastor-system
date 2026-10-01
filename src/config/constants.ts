@@ -36,6 +36,15 @@ export const DEFAULT_REPORT_DEADLINE_DAY = 20;
 export const MAX_REPORT_DEADLINE_DAY = 27;
 export const MIN_REPORT_DEADLINE_DAY = 1;
 
+// Slug de la subcategoria "Visitacion" (categoria Confraternidad). Sus
+// actividades registran el detalle de cada visita en `visits[]`.
+// Si el catalogo cambia este identificador, actualizar aqui y en el frontend.
+export const VISITATION_SUBCATEGORY_ID = 'visitacion';
+
+// Maximo de visitas por actividad de visitacion en un informe diario.
+// Debe coincidir con MAX_VISITS_PER_ACTIVITY del frontend.
+export const MAX_VISITS_PER_ACTIVITY = 50;
+
 // Rango de anios validos para filtros y queries.
 export const YEAR_MIN = 2000;
 export const YEAR_MAX = 2100;

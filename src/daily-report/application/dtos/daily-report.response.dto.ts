@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { ActivityEntry } from '../../domain/entities/daily-report.entity.js';
+import {
+  ActivityEntry,
+  DailyReportEntity,
+} from '../../domain/entities/daily-report.entity.js';
+import { normalizeActivitiesForRead } from '../helpers/visitation-helpers.js';
 
 export class DailyReportResponseDto {
   @ApiProperty()
@@ -37,4 +41,20 @@ export class DailyReportResponseDto {
   })
   @Expose()
   isEditable: boolean;
+
+  static fromEntity(
+    report: DailyReportEntity,
+    isEditable: boolean,
+  ): DailyReportResponseDto {
+    return {
+      id: report.id,
+      pastorId: report.pastorId,
+      date: report.date,
+      activities: normalizeActivitiesForRead(report.activities ?? []),
+      observations: report.observations,
+      createdAt: report.createdAt,
+      updatedAt: report.updatedAt,
+      isEditable,
+    };
+  }
 }

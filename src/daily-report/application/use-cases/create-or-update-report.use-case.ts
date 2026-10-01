@@ -3,8 +3,16 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { DataSource } from 'typeorm';
-import { DailyReportEntity } from '../../domain/entities/daily-report.entity.js';
+import {
+  ActivityEntry,
+  DailyReportEntity,
+} from '../../domain/entities/daily-report.entity.js';
+import {
+  findIncompleteVisitations,
+  prepareActivitiesForPersistence,
+} from '../helpers/visitation-helpers.js';
 import { AssociationRepository } from '../../../association/infrastructure/repositories/association.repository.js';
 import { UserRepository } from '../../../auth/infrastructure/repositories/user.repository.js';
 import { CreateDailyReportDto } from '../dtos/create-daily-report.dto.js';
@@ -25,6 +33,8 @@ export class CreateOrUpdateReportUseCase {
     associationId: string,
     dto: CreateDailyReportDto,
   ): Promise<DailyReportResponseDto> {
+    const activities = this.prepareActivities(dto);
+
     const association = await this.associationRepo.findById(associationId);
     if (!association) {
       throw new BadRequestException('Asociacion no encontrada');
@@ -49,7 +59,7 @@ export class CreateOrUpdateReportUseCase {
 
       if (existing) {
         await repo.update(existing.id, {
-          activities: dto.activities,
+          activities,
           observations: dto.observations ?? '',
         });
         return repo.findOne({ where: { id: existing.id } });
@@ -58,24 +68,31 @@ export class CreateOrUpdateReportUseCase {
       const entity = repo.create({
         pastorId,
         date: dto.date,
-        activities: dto.activities,
+        activities,
         observations: dto.observations ?? '',
       });
       return repo.save(entity);
     });
 
-    return {
-      id: report!.id,
-      pastorId: report!.pastorId,
-      date: report!.date,
-      activities: report!.activities,
-      observations: report!.observations,
-      createdAt: report!.createdAt,
-      updatedAt: report!.updatedAt,
-      isEditable: isDateEditable(
+    return DailyReportResponseDto.fromEntity(
+      report!,
+      isDateEditable(
         parseBogotaDate(report!.date),
         association.reportDeadlineDay,
       ),
-    };
+    );
+  }
+
+  private prepareActivities(dto: CreateDailyReportDto): ActivityEntry[] {
+    const activities = prepareActivitiesForPersistence(
+      dto.activities,
+      randomUUID,
+    );
+    if (findIncompleteVisitations(activities).length > 0) {
+      throw new BadRequestException(
+        'Cada visitacion debe incluir al menos una visita con el nombre de la persona y el motivo',
+      );
+    }
+    return activities;
   }
 }

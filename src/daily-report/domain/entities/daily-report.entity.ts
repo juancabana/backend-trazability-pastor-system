@@ -8,6 +8,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export interface VisitDetail {
+  id: string;
+  churchName?: string;
+  visitedName: string;
+  whatsappPhone?: string;
+  visitReason: string;
+}
+
 export interface ActivityEntry {
   subcategoryId: string;
   categoryId: string;
@@ -16,9 +24,15 @@ export interface ActivityEntry {
   hours?: number;
   amount?: number;
   evidenceUrls?: string[];
+  /** Detalle de cada visita (solo subcategoria visitacion). */
+  visits?: VisitDetail[];
+  /** @deprecated Formato de una sola visita; se migra a `visits` al leer/escribir. */
   churchName?: string;
+  /** @deprecated Formato de una sola visita; se migra a `visits` al leer/escribir. */
   visitedName?: string;
+  /** @deprecated Formato de una sola visita; se migra a `visits` al leer/escribir. */
   whatsappPhone?: string;
+  /** @deprecated Formato de una sola visita; se migra a `visits` al leer/escribir. */
   visitReason?: string;
 }
 
