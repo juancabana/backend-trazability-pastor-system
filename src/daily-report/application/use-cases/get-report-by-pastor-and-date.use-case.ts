@@ -32,16 +32,9 @@ export class GetReportByPastorAndDateUseCase {
       association?.reportDeadlineDay ?? DEFAULT_REPORT_DEADLINE_DAY;
     const canEditAll = pastor?.canEditAllReports ?? false;
 
-    return {
-      id: report.id,
-      pastorId: report.pastorId,
-      date: report.date,
-      activities: report.activities,
-      observations: report.observations,
-      createdAt: report.createdAt,
-      updatedAt: report.updatedAt,
-      isEditable:
-        canEditAll || isDateEditable(parseBogotaDate(report.date), deadlineDay),
-    };
+    return DailyReportResponseDto.fromEntity(
+      report,
+      canEditAll || isDateEditable(parseBogotaDate(report.date), deadlineDay),
+    );
   }
 }

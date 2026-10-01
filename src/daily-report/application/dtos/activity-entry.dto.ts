@@ -6,8 +6,13 @@ import {
   IsArray,
   Min,
   MaxLength,
+  ArrayMaxSize,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { VisitDetailDto } from './visit-detail.dto.js';
+import { MAX_VISITS_PER_ACTIVITY } from '../../../config/constants.js';
 
 export class ActivityEntryDto {
   @ApiProperty({ example: 'campanas' })
@@ -49,8 +54,21 @@ export class ActivityEntryDto {
   evidenceUrls?: string[];
 
   @ApiPropertyOptional({
+    type: [VisitDetailDto],
+    description: `Visitas realizadas (solo aplica para subcategoria visitacion, maximo ${MAX_VISITS_PER_ACTIVITY}).`,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_VISITS_PER_ACTIVITY)
+  @ValidateNested({ each: true })
+  @Type(() => VisitDetailDto)
+  visits?: VisitDetailDto[];
+
+  @ApiPropertyOptional({
+    deprecated: true,
     example: 'Iglesia Central',
-    description: 'Nombre de la iglesia visitada (solo aplica para subcategoria visitacion).',
+    description:
+      'Nombre de la iglesia visitada (formato legado de una sola visita; usar `visits`).',
   })
   @IsOptional()
   @IsString()
@@ -58,8 +76,10 @@ export class ActivityEntryDto {
   churchName?: string;
 
   @ApiPropertyOptional({
+    deprecated: true,
     example: 'Maria Perez',
-    description: 'Nombre de la persona visitada (solo aplica para subcategoria visitacion).',
+    description:
+      'Nombre de la persona visitada (formato legado de una sola visita; usar `visits`).',
   })
   @IsOptional()
   @IsString()
@@ -67,8 +87,10 @@ export class ActivityEntryDto {
   visitedName?: string;
 
   @ApiPropertyOptional({
+    deprecated: true,
     example: '+57 300 123 4567',
-    description: 'Numero de WhatsApp de la persona visitada (solo aplica para subcategoria visitacion).',
+    description:
+      'Numero de WhatsApp de la persona visitada (formato legado de una sola visita; usar `visits`).',
   })
   @IsOptional()
   @IsString()
@@ -76,8 +98,10 @@ export class ActivityEntryDto {
   whatsappPhone?: string;
 
   @ApiPropertyOptional({
+    deprecated: true,
     example: 'Acompanamiento espiritual tras perdida familiar.',
-    description: 'Motivo de la visita (solo aplica para subcategoria visitacion).',
+    description:
+      'Motivo de la visita (formato legado de una sola visita; usar `visits`).',
   })
   @IsOptional()
   @IsString()
